@@ -35,11 +35,18 @@ const Header = () => {
 
           {/* Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" className="text-foreground hover:text-parking-primary">
+            <Button 
+              variant="ghost" 
+              className="text-foreground hover:text-parking-primary"
+              onClick={() => window.location.href = '/sign-in'}
+            >
               <User className="h-4 w-4 mr-2" />
               Sign In
             </Button>
-            <Button className="bg-parking-accent hover:bg-parking-accent/90 text-accent-foreground">
+            <Button 
+              className="bg-parking-accent hover:bg-parking-accent/90 text-accent-foreground"
+              onClick={() => window.location.href = '/sign-up'}
+            >
               Get Started
             </Button>
           </div>
@@ -72,11 +79,18 @@ const Header = () => {
                 Support
               </a>
               <div className="flex flex-col space-y-2 pt-4 border-t border-border">
-                <Button variant="ghost" className="justify-start text-foreground hover:text-parking-primary">
+                <Button 
+                  variant="ghost" 
+                  className="justify-start text-foreground hover:text-parking-primary"
+                  onClick={() => window.location.href = '/sign-in'}
+                >
                   <User className="h-4 w-4 mr-2" />
                   Sign In
                 </Button>
-                <Button className="justify-start bg-parking-accent hover:bg-parking-accent/90 text-accent-foreground">
+                <Button 
+                  className="justify-start bg-parking-accent hover:bg-parking-accent/90 text-accent-foreground"
+                  onClick={() => window.location.href = '/sign-up'}
+                >
                   Get Started
                 </Button>
               </div>
