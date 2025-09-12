@@ -14,7 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      parking_locations: {
+        Row: {
+          address: string
+          available_slots: number
+          created_at: string
+          features: string[] | null
+          id: string
+          latitude: number
+          longitude: number
+          name: string
+          price_per_hour: number
+          total_slots: number
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          available_slots?: number
+          created_at?: string
+          features?: string[] | null
+          id?: string
+          latitude: number
+          longitude: number
+          name: string
+          price_per_hour: number
+          total_slots?: number
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          available_slots?: number
+          created_at?: string
+          features?: string[] | null
+          id?: string
+          latitude?: number
+          longitude?: number
+          name?: string
+          price_per_hour?: number
+          total_slots?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
