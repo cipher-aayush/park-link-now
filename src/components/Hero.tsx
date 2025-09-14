@@ -1,9 +1,22 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, MapPin, Clock, Shield } from "lucide-react";
+import { Search, MapPin, Clock, Shield, ArrowRight } from "lucide-react";
 import heroImage from "@/assets/parking-hero.jpg";
+import LocationSearch from "./LocationSearch";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const Hero = () => {
+  const [searchLocation, setSearchLocation] = useState<{lat: number, lng: number, address: string} | null>(null);
+  const { toast } = useToast();
+
+  const handleLocationFound = (lat: number, lng: number, address: string) => {
+    setSearchLocation({ lat, lng, address });
+    toast({
+      title: "Location set",
+      description: `Searching for parking near: ${address}`
+    });
+  };
   return (
     <section className="relative min-h-[80vh] flex items-center">
       {/* Background Image with Overlay */}
@@ -28,41 +41,18 @@ const Hero = () => {
             Skip the hassle of searching for parking. Book your spot in advance and save time with our smart parking solution.
           </p>
 
-          {/* Search Form */}
-          <div className="bg-background rounded-2xl p-6 shadow-parking max-w-3xl">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="md:col-span-2">
-                <label className="text-sm font-medium text-foreground mb-2 block">
-                  <MapPin className="h-4 w-4 inline mr-1" />
-                  Location
-                </label>
-                <Input 
-                  placeholder="Enter address or landmark"
-                  className="h-12"
-                />
+          {/* Enhanced Search Card */}
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 shadow-2xl">
+            <LocationSearch onLocationFound={handleLocationFound} />
+            
+            {searchLocation && (
+              <div className="mt-4 p-4 bg-white/10 rounded-lg">
+                <p className="text-primary-foreground text-sm">
+                  <MapPin className="inline h-4 w-4 mr-1" />
+                  Selected: {searchLocation.address}
+                </p>
               </div>
-              
-              <div>
-                <label className="text-sm font-medium text-foreground mb-2 block">
-                  <Clock className="h-4 w-4 inline mr-1" />
-                  Date & Time
-                </label>
-                <Input 
-                  type="datetime-local"
-                  className="h-12"
-                />
-              </div>
-              
-              <div className="flex items-end">
-                <Button 
-                  size="lg" 
-                  className="w-full h-12 bg-parking-accent hover:bg-parking-accent/90 text-accent-foreground font-semibold"
-                >
-                  <Search className="h-5 w-5 mr-2" />
-                  Search
-                </Button>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Features */}

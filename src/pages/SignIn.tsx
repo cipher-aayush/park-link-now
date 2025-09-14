@@ -4,21 +4,41 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from "lucide-react";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     rememberMe: false
   });
+  
+  const navigate = useNavigate();
+  const { signIn, user } = useAuth();
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement sign in logic with Supabase
-    console.log("Sign in attempted:", formData);
+    setLoading(true);
+    
+    const { error } = await signIn(formData.email, formData.password);
+    setLoading(false);
+    
+    if (!error) {
+      navigate('/');
+    }
   };
 
   return (
@@ -110,9 +130,10 @@ const SignIn = () => {
 
               <Button 
                 type="submit" 
-                className="w-full h-12 bg-parking-primary hover:bg-parking-primary-light text-primary-foreground font-semibold"
+                disabled={loading}
+                className="w-full h-12 bg-parking-primary hover:bg-parking-primary-light text-primary-foreground font-semibold disabled:opacity-50"
               >
-                Sign In
+                {loading ? "Signing In..." : "Sign In"}
               </Button>
             </form>
 

@@ -1,9 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { Car, Menu, User } from "lucide-react";
+import { Car, Menu, User, LogOut } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   return (
     <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border sticky top-0 z-50">
@@ -35,20 +38,40 @@ const Header = () => {
 
           {/* Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button 
-              variant="ghost" 
-              className="text-foreground hover:text-parking-primary"
-              onClick={() => window.location.href = '/sign-in'}
-            >
-              <User className="h-4 w-4 mr-2" />
-              Sign In
-            </Button>
-            <Button 
-              className="bg-parking-accent hover:bg-parking-accent/90 text-accent-foreground"
-              onClick={() => window.location.href = '/sign-up'}
-            >
-              Get Started
-            </Button>
+            {user ? (
+              <div className="flex items-center space-x-3">
+                <span className="text-foreground text-sm">
+                  Welcome back!
+                </span>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={signOut}
+                  className="text-foreground hover:text-parking-primary"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Link to="/sign-in">
+                  <Button 
+                    variant="ghost" 
+                    className="text-foreground hover:text-parking-primary"
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    Sign In
+                  </Button>
+                </Link>
+                <Button 
+                  className="bg-parking-accent hover:bg-parking-accent/90 text-accent-foreground"
+                  onClick={() => window.location.href = '/sign-up'}
+                >
+                  Get Started
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -79,20 +102,45 @@ const Header = () => {
                 Support
               </a>
               <div className="flex flex-col space-y-2 pt-4 border-t border-border">
-                <Button 
-                  variant="ghost" 
-                  className="justify-start text-foreground hover:text-parking-primary"
-                  onClick={() => window.location.href = '/sign-in'}
-                >
-                  <User className="h-4 w-4 mr-2" />
-                  Sign In
-                </Button>
-                <Button 
-                  className="justify-start bg-parking-accent hover:bg-parking-accent/90 text-accent-foreground"
-                  onClick={() => window.location.href = '/sign-up'}
-                >
-                  Get Started
-                </Button>
+                {user ? (
+                  <div className="space-y-2">
+                    <div className="px-3 py-2 text-foreground text-sm">
+                      Welcome back!
+                    </div>
+                    <Button 
+                      variant="ghost"
+                      className="justify-start text-foreground hover:text-parking-primary"
+                      onClick={() => {
+                        signOut();
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Sign Out
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <Link to="/sign-in">
+                      <Button 
+                        variant="ghost" 
+                        className="justify-start text-foreground hover:text-parking-primary w-full"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <User className="h-4 w-4 mr-2" />
+                        Sign In
+                      </Button>
+                    </Link>
+                    <Link to="/sign-up">
+                      <Button 
+                        className="justify-start bg-parking-accent hover:bg-parking-accent/90 text-accent-foreground w-full"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Get Started
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </nav>
           </div>

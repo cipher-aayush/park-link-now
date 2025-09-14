@@ -5,11 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, Phone } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -18,11 +21,30 @@ const SignUp = () => {
     confirmPassword: "",
     agreeToTerms: false
   });
+  
+  const navigate = useNavigate();
+  const { signUp } = useAuth();
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement sign up logic with Supabase
-    console.log("Sign up attempted:", formData);
+    if (formData.password !== formData.confirmPassword) {
+      toast({
+        variant: "destructive",
+        title: "Password mismatch",
+        description: "Passwords do not match. Please try again."
+      });
+      return;
+    }
+    
+    setLoading(true);
+    const { error } = await signUp(formData.email, formData.password, formData.fullName, formData.phone);
+    setLoading(false);
+    
+    if (!error) {
+      // Redirect to sign in page
+      navigate('/sign-in');
+    }
   };
 
   return (
@@ -175,9 +197,10 @@ const SignUp = () => {
 
               <Button 
                 type="submit" 
-                className="w-full h-12 bg-parking-primary hover:bg-parking-primary-light text-primary-foreground font-semibold"
+                disabled={loading || !formData.agreeToTerms}
+                className="w-full h-12 bg-parking-primary hover:bg-parking-primary-light text-primary-foreground font-semibold disabled:opacity-50"
               >
-                Create Account
+                {loading ? "Creating Account..." : "Create Account"}
               </Button>
             </form>
 
