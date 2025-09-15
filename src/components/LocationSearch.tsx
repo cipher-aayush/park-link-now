@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { MapPin, Navigation, Calendar, Clock } from "lucide-react";
+import { Calendar, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import LocationAutoComplete from "./LocationAutoComplete";
 
 interface LocationSearchProps {
   onLocationFound?: (lat: number, lng: number, address: string) => void;
@@ -147,30 +148,20 @@ const LocationSearch = ({ onLocationFound }: LocationSearchProps) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Location Search */}
           <div className="space-y-2">
-            <Label htmlFor="location" className="text-sm font-medium">
-              <MapPin className="h-4 w-4 inline mr-1" />
+            <Label className="text-sm font-medium">
               Location
             </Label>
-            <div className="flex space-x-2">
-              <Input
-                id="location"
-                placeholder="Enter location or address"
-                value={searchLocation}
-                onChange={(e) => setSearchLocation(e.target.value)}
-                className="flex-1"
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={getCurrentLocation}
-                disabled={loading}
-                className="shrink-0"
-              >
-                <Navigation className="h-4 w-4" />
-              </Button>
-            </div>
+            <LocationAutoComplete
+              onLocationSelect={(location) => {
+                setSearchLocation(location.address);
+                if (onLocationFound) {
+                  onLocationFound(location.lat, location.lng, location.address);
+                }
+              }}
+              placeholder="Enter location or address"
+              value={searchLocation}
+              onChange={setSearchLocation}
+            />
           </div>
 
           {/* Date Picker */}
@@ -228,8 +219,16 @@ const LocationSearch = ({ onLocationFound }: LocationSearchProps) => {
         {/* Search Button */}
         <div className="mt-6">
           <Button 
-            onClick={handleSearch}
-            disabled={loading}
+            onClick={() => {
+              if (searchLocation && onLocationFound) {
+                // Simple search trigger - the actual location handling is done by LocationAutoComplete
+                toast({
+                  title: "Searching...",
+                  description: "Finding parking spots near your location"
+                });
+              }
+            }}
+            disabled={loading || !searchLocation}
             className="w-full bg-parking-primary hover:bg-parking-primary-light text-primary-foreground"
             size="lg"
           >

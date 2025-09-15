@@ -17,16 +17,16 @@ const Hero = () => {
       description: `Searching for parking near: ${address}`
     });
   };
-  return (
-    <section className="relative min-h-[80vh] flex items-center">
-      {/* Background Image with Overlay */}
+return (
+    <section className="relative min-h-[80vh] flex items-center overflow-hidden">
+      {/* Animated Background Image with Overlay */}
       <div className="absolute inset-0">
         <img 
           src={heroImage} 
           alt="Modern parking garage" 
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover floating-element"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-parking-primary/90 to-parking-primary-light/80" />
+        <div className="absolute inset-0 animated-bg opacity-90" />
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
