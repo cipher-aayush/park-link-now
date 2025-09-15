@@ -14,6 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookings: {
+        Row: {
+          booking_date: string
+          booking_status: string
+          created_at: string
+          duration_hours: number
+          end_time: string
+          id: string
+          parking_location_id: string
+          payment_id: string | null
+          payment_method: string | null
+          payment_status: string
+          qr_code: string | null
+          start_time: string
+          total_amount: number
+          updated_at: string
+          user_id: string
+          vehicle_number: string | null
+        }
+        Insert: {
+          booking_date: string
+          booking_status?: string
+          created_at?: string
+          duration_hours: number
+          end_time: string
+          id?: string
+          parking_location_id: string
+          payment_id?: string | null
+          payment_method?: string | null
+          payment_status?: string
+          qr_code?: string | null
+          start_time: string
+          total_amount: number
+          updated_at?: string
+          user_id: string
+          vehicle_number?: string | null
+        }
+        Update: {
+          booking_date?: string
+          booking_status?: string
+          created_at?: string
+          duration_hours?: number
+          end_time?: string
+          id?: string
+          parking_location_id?: string
+          payment_id?: string | null
+          payment_method?: string | null
+          payment_status?: string
+          qr_code?: string | null
+          start_time?: string
+          total_amount?: number
+          updated_at?: string
+          user_id?: string
+          vehicle_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_parking_location_id_fkey"
+            columns: ["parking_location_id"]
+            isOneToOne: false
+            referencedRelation: "parking_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       parking_locations: {
         Row: {
           address: string
@@ -62,6 +127,7 @@ export type Database = {
           full_name: string | null
           id: string
           phone: string | null
+          role: string | null
           updated_at: string
         }
         Insert: {
@@ -69,6 +135,7 @@ export type Database = {
           full_name?: string | null
           id: string
           phone?: string | null
+          role?: string | null
           updated_at?: string
         }
         Update: {
@@ -76,6 +143,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          role?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -85,7 +153,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_booking_qr: {
+        Args: { booking_id: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
