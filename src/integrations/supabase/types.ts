@@ -79,43 +79,125 @@ export type Database = {
           },
         ]
       }
+      favorites: {
+        Row: {
+          created_at: string | null
+          id: string
+          parking_location_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          parking_location_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          parking_location_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_parking_location_id_fkey"
+            columns: ["parking_location_id"]
+            isOneToOne: false
+            referencedRelation: "parking_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          booking_id: string | null
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          title: string
+          type: string | null
+          user_id: string
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          title: string
+          type?: string | null
+          user_id: string
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          title?: string
+          type?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       parking_locations: {
         Row: {
           address: string
           available_slots: number
+          average_rating: number | null
+          category: string | null
           created_at: string
           features: string[] | null
           id: string
+          images: string[] | null
           latitude: number
           longitude: number
           name: string
           price_per_hour: number
+          total_reviews: number | null
           total_slots: number
           updated_at: string
         }
         Insert: {
           address: string
           available_slots?: number
+          average_rating?: number | null
+          category?: string | null
           created_at?: string
           features?: string[] | null
           id?: string
+          images?: string[] | null
           latitude: number
           longitude: number
           name: string
           price_per_hour: number
+          total_reviews?: number | null
           total_slots?: number
           updated_at?: string
         }
         Update: {
           address?: string
           available_slots?: number
+          average_rating?: number | null
+          category?: string | null
           created_at?: string
           features?: string[] | null
           id?: string
+          images?: string[] | null
           latitude?: number
           longitude?: number
           name?: string
           price_per_hour?: number
+          total_reviews?: number | null
           total_slots?: number
           updated_at?: string
         }
@@ -145,6 +227,89 @@ export type Database = {
           phone?: string | null
           role?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          id: string
+          is_approved: boolean | null
+          parking_location_id: string
+          rating: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          is_approved?: boolean | null
+          parking_location_id: string
+          rating: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          is_approved?: boolean | null
+          parking_location_id?: string
+          rating?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_parking_location_id_fkey"
+            columns: ["parking_location_id"]
+            isOneToOne: false
+            referencedRelation: "parking_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_preferences: {
+        Row: {
+          created_at: string | null
+          dark_mode: boolean | null
+          email_notifications: boolean | null
+          id: string
+          max_distance: number | null
+          notifications_enabled: boolean | null
+          preferred_payment_method: string | null
+          preferred_price_range: unknown | null
+          push_notifications: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          dark_mode?: boolean | null
+          email_notifications?: boolean | null
+          id?: string
+          max_distance?: number | null
+          notifications_enabled?: boolean | null
+          preferred_payment_method?: string | null
+          preferred_price_range?: unknown | null
+          push_notifications?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          dark_mode?: boolean | null
+          email_notifications?: boolean | null
+          id?: string
+          max_distance?: number | null
+          notifications_enabled?: boolean | null
+          preferred_payment_method?: string | null
+          preferred_price_range?: unknown | null
+          push_notifications?: boolean | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
