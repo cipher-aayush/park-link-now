@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { Car, Menu, User, LogOut } from "lucide-react";
-import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Car, Menu, User, LogOut, Bell, Heart, Calendar } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import DarkModeToggle from "./DarkModeToggle";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
