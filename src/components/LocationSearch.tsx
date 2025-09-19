@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import LocationAutoComplete from "./LocationAutoComplete";
 
 interface LocationSearchProps {
-  onLocationFound?: (lat: number, lng: number, address: string) => void;
+  onLocationFound?: (lat: number, lng: number, address: string, date?: string, time?: string, duration?: string) => void;
 }
 
 const LocationSearch = ({ onLocationFound }: LocationSearchProps) => {
@@ -39,7 +39,7 @@ const LocationSearch = ({ onLocationFound }: LocationSearchProps) => {
               setSearchLocation(address);
               
               if (onLocationFound) {
-                onLocationFound(latitude, longitude, address);
+                onLocationFound(latitude, longitude, address, selectedDate, selectedTime, duration);
               }
               
               toast({
@@ -52,7 +52,7 @@ const LocationSearch = ({ onLocationFound }: LocationSearchProps) => {
             setSearchLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
             
             if (onLocationFound) {
-              onLocationFound(latitude, longitude, `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+              onLocationFound(latitude, longitude, `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`, selectedDate, selectedTime, duration);
             }
             
             toast({
@@ -112,7 +112,7 @@ const LocationSearch = ({ onLocationFound }: LocationSearchProps) => {
         const address = data.features[0].place_name;
         
         if (onLocationFound) {
-          onLocationFound(lat, lng, address);
+          onLocationFound(lat, lng, address, selectedDate, selectedTime, duration);
         }
         
         toast({
@@ -155,7 +155,7 @@ const LocationSearch = ({ onLocationFound }: LocationSearchProps) => {
               onLocationSelect={(location) => {
                 setSearchLocation(location.address);
                 if (onLocationFound) {
-                  onLocationFound(location.lat, location.lng, location.address);
+                  onLocationFound(location.lat, location.lng, location.address, selectedDate, selectedTime, duration);
                 }
               }}
               placeholder="Enter location or address"
@@ -219,15 +219,7 @@ const LocationSearch = ({ onLocationFound }: LocationSearchProps) => {
         {/* Search Button */}
         <div className="mt-6">
           <Button 
-            onClick={() => {
-              if (searchLocation && onLocationFound) {
-                // Simple search trigger - the actual location handling is done by LocationAutoComplete
-                toast({
-                  title: "Searching...",
-                  description: "Finding parking spots near your location"
-                });
-              }
-            }}
+            onClick={handleSearch}
             disabled={loading || !searchLocation}
             className="w-full bg-parking-primary hover:bg-parking-primary-light text-primary-foreground"
             size="lg"

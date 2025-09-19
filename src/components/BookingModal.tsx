@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import PaymentModal from './PaymentModal';
+import ParkingTicket from './ParkingTicket';
 
 interface ParkingLocation {
   id: string;
@@ -27,20 +28,25 @@ interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
   location: ParkingLocation | null;
+  prefilledDate?: string;
+  prefilledTime?: string;
+  prefilledDuration?: string;
 }
 
-const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
+const BookingModal = ({ isOpen, onClose, location, prefilledDate, prefilledTime, prefilledDuration }: BookingModalProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [bookingData, setBookingData] = useState({
-    date: new Date().toISOString().split('T')[0],
-    startTime: '09:00',
-    duration: '2',
+    date: prefilledDate || new Date().toISOString().split('T')[0],
+    startTime: prefilledTime || '09:00',
+    duration: prefilledDuration || '2',
     vehicleNumber: ''
   });
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showTicket, setShowTicket] = useState(false);
+  const [ticketData, setTicketData] = useState<any>(null);
 
   const calculateTotal = () => {
     if (!location) return 0;
@@ -115,13 +121,24 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
     }
   };
 
-  const handlePaymentSuccess = () => {
+  const handlePaymentSuccess = (booking?: any) => {
     setPaymentModalOpen(false);
-    onClose();
-    toast({
-      title: "Booking confirmed!",
-      description: "Your parking spot has been successfully booked."
-    });
+    
+    // Create ticket data
+    const ticket = {
+      id: bookingId || `PK${Date.now()}`,
+      location_name: location?.name || '',
+      location_address: location?.address || '',
+      date: bookingData.date,
+      start_time: bookingData.startTime,
+      end_time: calculateEndTime(),
+      duration: parseInt(bookingData.duration),
+      total_amount: calculateTotal(),
+      vehicle_number: bookingData.vehicleNumber
+    };
+    
+    setTicketData(ticket);
+    setShowTicket(true);
   };
 
   if (!location) return null;
@@ -296,6 +313,16 @@ const BookingModal = ({ isOpen, onClose, location }: BookingModalProps) => {
         bookingId={bookingId}
         amount={calculateTotal()}
       />
+      
+      {showTicket && ticketData && (
+        <ParkingTicket
+          booking={ticketData}
+          onClose={() => {
+            setShowTicket(false);
+            onClose();
+          }}
+        />
+      )}
     </>
   );
 };

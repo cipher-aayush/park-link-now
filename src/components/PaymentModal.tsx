@@ -13,7 +13,7 @@ import QRCode from 'qrcode';
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (booking?: any) => void;
   bookingId: string | null;
   amount: number;
 }

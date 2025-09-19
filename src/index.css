@@ -147,6 +147,16 @@ All colors MUST be HSL.
     animation: gradient 15s ease infinite;
   }
   
+  .animated-bg-moving {
+    background: linear-gradient(-45deg, hsl(var(--parking-primary)), hsl(var(--parking-primary-light)), hsl(var(--parking-accent)), hsl(var(--primary)));
+    background-size: 400% 400%;
+    animation: gradientMove 20s ease infinite;
+  }
+  
+  .moving-bg {
+    animation: backgroundMove 30s linear infinite;
+  }
+  
   .floating-element {
     animation: float 6s ease-in-out infinite;
   }
@@ -162,6 +172,20 @@ All colors MUST be HSL.
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  25% { background-position: 100% 50%; }
+  50% { background-position: 100% 100%; }
+  75% { background-position: 50% 100%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes backgroundMove {
+  0% { transform: translateX(0) scale(1.1); }
+  50% { transform: translateX(-50px) scale(1.15); }
+  100% { transform: translateX(0) scale(1.1); }
 }
 
 @keyframes float {

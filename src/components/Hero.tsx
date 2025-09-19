@@ -5,28 +5,38 @@ import heroImage from "@/assets/parking-hero.jpg";
 import LocationSearch from "./LocationSearch";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
   const [searchLocation, setSearchLocation] = useState<{lat: number, lng: number, address: string} | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleLocationFound = (lat: number, lng: number, address: string) => {
+  const handleLocationFound = (lat: number, lng: number, address: string, date?: string, time?: string, duration?: string) => {
     setSearchLocation({ lat, lng, address });
-    toast({
-      title: "Location set",
-      description: `Searching for parking near: ${address}`
+    
+    // Navigate to results page with search parameters
+    const params = new URLSearchParams({
+      lat: lat.toString(),
+      lng: lng.toString(),
+      address,
+      ...(date && { date }),
+      ...(time && { time }),
+      ...(duration && { duration })
     });
+    
+    navigate(`/parking-results?${params.toString()}`);
   };
 return (
     <section className="relative min-h-[80vh] flex items-center overflow-hidden">
-      {/* Animated Background Image with Overlay */}
+      {/* Moving Background with Overlay */}
       <div className="absolute inset-0">
         <img 
           src={heroImage} 
           alt="Modern parking garage" 
-          className="w-full h-full object-cover floating-element"
+          className="w-full h-full object-cover moving-bg"
         />
-        <div className="absolute inset-0 animated-bg opacity-90" />
+        <div className="absolute inset-0 animated-bg-moving opacity-90" />
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
