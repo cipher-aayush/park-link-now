@@ -28,40 +28,58 @@ const LocationSearch = ({ onLocationFound }: LocationSearchProps) => {
           const { latitude, longitude } = position.coords;
           
           try {
-            // Reverse geocoding to get address
-            const response = await fetch(
-              `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=pk.eyJ1IjoibG92YWJsZWFpIiwiYSI6ImNscTBtYzUwbjFuOG8yanM4cjR1MW9rOTIifQ.5zJxR7O3UyPVkl8dRnmjxA`
-            );
-            const data = await response.json();
-            
-            if (data.features && data.features.length > 0) {
-              const address = data.features[0].place_name;
-              setSearchLocation(address);
-              
-              if (onLocationFound) {
-                onLocationFound(latitude, longitude, address, selectedDate, selectedTime, duration);
-              }
-              
-              toast({
-                title: "Location found",
-                description: "Your current location has been set"
-              });
+            // Use Google Maps Geocoding for reverse geocoding
+            if (window.google && window.google.maps) {
+              const geocoder = new google.maps.Geocoder();
+              geocoder.geocode(
+                { location: { lat: latitude, lng: longitude } },
+                (results, status) => {
+                  if (status === 'OK' && results && results.length > 0) {
+                    const address = results[0].formatted_address;
+                    setSearchLocation(address);
+                    
+                    if (onLocationFound) {
+                      onLocationFound(latitude, longitude, address, selectedDate, selectedTime, duration);
+                    }
+                    
+                    toast({
+                      title: "Location found",
+                      description: "Your current location has been set"
+                    });
+                  } else {
+                    const coords = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+                    setSearchLocation(coords);
+                    
+                    if (onLocationFound) {
+                      onLocationFound(latitude, longitude, coords, selectedDate, selectedTime, duration);
+                    }
+                    
+                    toast({
+                      title: "Location found",
+                      description: "Current location coordinates have been set"
+                    });
+                  }
+                  setLoading(false);
+                }
+              );
+            } else {
+              throw new Error('Google Maps not loaded');
             }
           } catch (error) {
             console.error('Error getting address:', error);
-            setSearchLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+            const coords = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+            setSearchLocation(coords);
             
             if (onLocationFound) {
-              onLocationFound(latitude, longitude, `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`, selectedDate, selectedTime, duration);
+              onLocationFound(latitude, longitude, coords, selectedDate, selectedTime, duration);
             }
             
             toast({
               title: "Location found",
               description: "Current location coordinates have been set"
             });
+            setLoading(false);
           }
-          
-          setLoading(false);
         },
         (error) => {
           console.error('Error getting location:', error);
@@ -101,39 +119,49 @@ const LocationSearch = ({ onLocationFound }: LocationSearchProps) => {
     setLoading(true);
     
     try {
-      // Geocoding to get coordinates from address
-      const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchLocation)}.json?access_token=pk.eyJ1IjoibG92YWJsZWFpIiwiYSI6ImNscTBtYzUwbjFuOG8yanM4cjR1MW9rOTIifQ.5zJxR7O3UyPVkl8dRnmjxA&country=IN&limit=1`
-      );
-      const data = await response.json();
-      
-      if (data.features && data.features.length > 0) {
-        const [lng, lat] = data.features[0].center;
-        const address = data.features[0].place_name;
-        
-        if (onLocationFound) {
-          onLocationFound(lat, lng, address, selectedDate, selectedTime, duration);
-        }
-        
-        toast({
-          title: "Location found",
-          description: `Found: ${address}`
-        });
+      // Use Google Maps Geocoding for address search
+      if (window.google && window.google.maps) {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode(
+          { 
+            address: searchLocation,
+            componentRestrictions: { country: 'IN' }
+          },
+          (results, status) => {
+            if (status === 'OK' && results && results.length > 0) {
+              const location = results[0].geometry.location;
+              const lat = location.lat();
+              const lng = location.lng();
+              const address = results[0].formatted_address;
+              
+              if (onLocationFound) {
+                onLocationFound(lat, lng, address, selectedDate, selectedTime, duration);
+              }
+              
+              toast({
+                title: "Location found",
+                description: `Found: ${address}`
+              });
+            } else {
+              toast({
+                variant: "destructive",
+                title: "Location not found",
+                description: "Please try a different address"
+              });
+            }
+            setLoading(false);
+          }
+        );
       } else {
-        toast({
-          variant: "destructive",
-          title: "Location not found",
-          description: "Please try a different address"
-        });
+        throw new Error('Google Maps not loaded');
       }
     } catch (error) {
       console.error('Error searching location:', error);
       toast({
         variant: "destructive",
         title: "Search failed",
-        description: "Unable to search for the location"
+        description: "Unable to search for the location. Please ensure Google Maps is loaded."
       });
-    } finally {
       setLoading(false);
     }
   };
