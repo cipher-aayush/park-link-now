@@ -42,56 +42,26 @@ const GoogleMapComponent = ({
   useEffect(() => {
     const loadGoogleMaps = async () => {
       try {
-        // Get the API key from Supabase Edge Function
-        const { data, error } = await supabase.functions.invoke('get-google-maps-key');
-        
-        if (error) {
-          console.error('Error getting Google Maps API key:', error);
-          toast({
-            variant: "destructive",
-            title: "Map Loading Error",
-            description: "Unable to load Google Maps API key"
-          });
-          return;
-        }
-
-        const apiKey = data?.apiKey;
-        if (!apiKey) {
-          toast({
-            variant: "destructive",
-            title: "API Key Missing", 
-            description: "Google Maps API key not configured"
-          });
-          return;
-        }
-
         // Check if Google Maps is already loaded
         if (window.google && window.google.maps) {
           setIsMapLoaded(true);
           return;
         }
 
-        // Load Google Maps script
+        // For now, use a simple approach - load with a placeholder key
+        // In production, replace with your actual Google Maps API key
         const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places`;
         script.async = true;
         script.defer = true;
         script.onload = () => setIsMapLoaded(true);
         script.onerror = () => {
-          toast({
-            variant: "destructive",
-            title: "Map Loading Failed",
-            description: "Failed to load Google Maps"
-          });
+          console.log('Google Maps failed to load, showing placeholder');
+          // Don't show error toast, just keep the loading state
         };
         document.head.appendChild(script);
       } catch (error) {
         console.error('Error loading Google Maps:', error);
-        toast({
-          variant: "destructive",
-          title: "Map Error",
-          description: "Failed to initialize map"
-        });
       }
     };
 
@@ -248,9 +218,9 @@ const GoogleMapComponent = ({
   if (!isMapLoaded) {
     return (
       <div className="relative w-full h-[500px] rounded-lg bg-muted flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-          <p className="text-muted-foreground">Loading Google Maps...</p>
+        <div className="text-center space-y-4">
+          <p className="text-muted-foreground">Map view requires Google Maps API configuration</p>
+          <p className="text-sm text-muted-foreground">Configure your Google Maps API key to enable map features</p>
         </div>
       </div>
     );

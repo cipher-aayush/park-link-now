@@ -68,15 +68,20 @@ const ParkingResults = () => {
   };
 
   const handleBookNow = (location: ParkingLocation) => {
+    console.log('Book Now clicked', { user, location });
+    
     if (!user) {
       toast({
         variant: "destructive",
         title: "Please sign in",
         description: "You need to sign in to book a parking slot"
       });
+      // Redirect to sign in page
+      window.location.href = '/sign-in';
       return;
     }
 
+    console.log('Opening booking modal for location:', location.name);
     setSelectedLocation(location);
     setShowBookingModal(true);
   };
@@ -191,8 +196,9 @@ const ParkingResults = () => {
                 <Button 
                   onClick={() => handleBookNow(location)}
                   className="w-full bg-parking-primary hover:bg-parking-primary-light text-primary-foreground"
+                  size="lg"
                 >
-                  Book Now
+                  {user ? 'Book Now' : 'Sign In to Book'}
                 </Button>
               </CardContent>
             </Card>

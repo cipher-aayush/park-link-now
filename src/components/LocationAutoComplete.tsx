@@ -30,7 +30,8 @@ const LocationAutoComplete = ({
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!inputRef.current || typeof window === 'undefined' || !window.google) return;
+    // Skip if Google Maps is not loaded
+    if (!inputRef.current || typeof window === 'undefined' || !window.google || !window.google.maps) return;
 
     // Initialize autocomplete
     autocompleteRef.current = new google.maps.places.Autocomplete(inputRef.current, {
@@ -79,7 +80,25 @@ const LocationAutoComplete = ({
         async (position) => {
           const { latitude, longitude } = position.coords;
           
-          // Reverse geocoding
+          // Check if Google Maps is available for reverse geocoding
+          if (!window.google || !window.google.maps) {
+            // Fallback to coordinates only
+            const coords = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+            setInputValue(coords);
+            onLocationSelect({ lat: latitude, lng: longitude, address: coords });
+            
+            if (onChange) {
+              onChange(coords);
+            }
+            
+            toast({
+              title: "Location found",
+              description: "Current location coordinates have been set"
+            });
+            return;
+          }
+          
+          // Reverse geocoding with Google Maps
           const geocoder = new google.maps.Geocoder();
           try {
             const response = await new Promise<google.maps.GeocoderResponse>((resolve, reject) => {
