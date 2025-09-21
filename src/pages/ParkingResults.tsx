@@ -7,6 +7,7 @@ import { MapPin, Star, Car, Shield, Zap, Camera, ArrowLeft } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import GoogleMapComponent from "@/components/GoogleMapComponent";
 import BookingModal from "@/components/BookingModal";
 import Header from "@/components/Header";
 
@@ -28,6 +29,7 @@ const ParkingResults = () => {
   const [locations, setLocations] = useState<ParkingLocation[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<ParkingLocation | null>(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
+  const [showMap, setShowMap] = useState(false);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -116,7 +118,31 @@ const ParkingResults = () => {
               {duration && <p>Duration: {duration} hour(s)</p>}
             </div>
           </div>
+          
+          <div className="mb-6">
+            <Button
+              onClick={() => setShowMap(!showMap)}
+              variant="outline"
+              className="mb-4"
+            >
+              <MapPin className="h-4 w-4 mr-2" />
+              {showMap ? "Hide Map" : "Show Map"}
+            </Button>
+          </div>
         </div>
+
+        {showMap && (
+          <div className="mb-8">
+            <GoogleMapComponent 
+              locations={locations}
+              selectedLocation={selectedLocation}
+              onLocationSelect={(location) => {
+                setSelectedLocation(location);
+                setShowBookingModal(true);
+              }}
+            />
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {locations.map((location) => (
