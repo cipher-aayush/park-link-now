@@ -73,38 +73,49 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, bookingId, amount }: Payment
     setLoading(true);
 
     try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Get the current session
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('Not authenticated');
+      }
 
-      // Generate QR code for the booking
-      const qrCode = await supabase
-        .rpc('generate_booking_qr', { booking_id: bookingId });
+      // Call the secure edge function to process payment
+      const { data, error } = await supabase.functions.invoke('process-payment', {
+        body: {
+          bookingId,
+          paymentMethod
+        }
+      });
 
-      // Update booking with payment details
-      const { error } = await supabase
-        .from('bookings')
-        .update({
-          payment_status: 'completed',
-          payment_method: paymentMethod,
-          payment_id: `PAY_${Date.now()}`,
-          qr_code: qrCode.data
-        })
-        .eq('id', bookingId);
+      if (error) {
+        console.error('Payment processing error:', error);
+        throw new Error(error.message || 'Payment processing failed');
+      }
 
-      if (error) throw error;
+      if (!data.success) {
+        throw new Error(data.error || 'Payment failed');
+      }
 
       toast({
         title: "Payment Successful!",
         description: `Payment of ₹${amount} completed successfully via ${paymentMethod.toUpperCase()}`
       });
 
-      onSuccess();
+      // Fetch updated booking
+      const { data: updatedBooking } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('id', bookingId)
+        .single();
+
+      onSuccess(updatedBooking);
     } catch (error) {
       console.error('Payment error:', error);
       toast({
         variant: "destructive",
         title: "Payment Failed",
-        description: "Unable to process payment. Please try again."
+        description: error instanceof Error ? error.message : "Unable to process payment. Please try again."
       });
     } finally {
       setLoading(false);

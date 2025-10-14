@@ -357,6 +357,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      update_booking_payment: {
+        Args: {
+          _booking_id: string
+          _payment_id: string
+          _payment_method: string
+          _payment_status: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "user" | "moderator"
