@@ -9,6 +9,21 @@ import { CreditCard, Smartphone, QrCode, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import QRCode from 'qrcode';
+import { z } from 'zod';
+
+// Validation schemas
+const cardSchema = z.object({
+  number: z.string().regex(/^[0-9\s]{13,19}$/, 'Invalid card number format'),
+  expiry: z.string().regex(/^(0[1-9]|1[0-2])\/[0-9]{2}$/, 'Invalid expiry format (MM/YY)'),
+  cvv: z.string().regex(/^[0-9]{3,4}$/, 'CVV must be 3-4 digits'),
+  name: z.string().min(3, 'Name must be at least 3 characters').max(100, 'Name too long'),
+  otp: z.string().regex(/^[0-9]{6}$/, 'OTP must be 6 digits').optional()
+});
+
+const upiSchema = z.object({
+  id: z.string().regex(/^[a-zA-Z0-9._-]+@[a-zA-Z]+$/, 'Invalid UPI ID format'),
+  pin: z.string().regex(/^[0-9]{4,6}$/, 'PIN must be 4-6 digits')
+});
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -97,11 +112,15 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, bookingId, amount }: Payment
   };
 
   const handleCardPayment = async () => {
-    if (!cardData.number || !cardData.expiry || !cardData.cvv || !cardData.name) {
+    // Validate card data
+    const validation = cardSchema.safeParse(cardData);
+    
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
       toast({
         variant: "destructive",
-        title: "Incomplete Details",
-        description: "Please fill in all card details"
+        title: "Invalid Card Details",
+        description: firstError.message
       });
       return;
     }
@@ -128,11 +147,15 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, bookingId, amount }: Payment
   };
 
   const handleUpiPayment = async () => {
-    if (!upiData.id || !upiData.pin) {
+    // Validate UPI data
+    const validation = upiSchema.safeParse(upiData);
+    
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
       toast({
         variant: "destructive",
-        title: "UPI Details Required",
-        description: "Please enter your UPI ID and PIN"
+        title: "Invalid UPI Details",
+        description: firstError.message
       });
       return;
     }
@@ -188,7 +211,7 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, bookingId, amount }: Payment
                     id="upiId"
                     placeholder="yourname@upi"
                     value={upiData.id}
-                    onChange={(e) => setUpiData(prev => ({ ...prev, id: e.target.value }))}
+                    onChange={(e) => setUpiData(prev => ({ ...prev, id: e.target.value.trim() }))}
                   />
                 </div>
                 <div className="space-y-2">
@@ -199,7 +222,10 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, bookingId, amount }: Payment
                     placeholder="Enter 4-6 digit PIN"
                     maxLength={6}
                     value={upiData.pin}
-                    onChange={(e) => setUpiData(prev => ({ ...prev, pin: e.target.value }))}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      setUpiData(prev => ({ ...prev, pin: value }));
+                    }}
                   />
                 </div>
                 <Button 
@@ -247,9 +273,12 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, bookingId, amount }: Payment
                       id="cvv"
                       type="password"
                       placeholder="123"
-                      maxLength={3}
+                      maxLength={4}
                       value={cardData.cvv}
-                      onChange={(e) => setCardData(prev => ({ ...prev, cvv: e.target.value }))}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '');
+                        setCardData(prev => ({ ...prev, cvv: value }));
+                      }}
                     />
                   </div>
                 </div>
@@ -270,7 +299,10 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, bookingId, amount }: Payment
                       placeholder="Enter 6-digit OTP"
                       maxLength={6}
                       value={cardData.otp}
-                      onChange={(e) => setCardData(prev => ({ ...prev, otp: e.target.value }))}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '');
+                        setCardData(prev => ({ ...prev, otp: value }));
+                      }}
                     />
                   </div>
                 )}

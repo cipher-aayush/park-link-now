@@ -40,6 +40,7 @@ const Admin = () => {
   const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [stats, setStats] = useState({
     totalBookings: 0,
     totalRevenue: 0,
@@ -49,9 +50,31 @@ const Admin = () => {
 
   useEffect(() => {
     if (user) {
-      fetchBookings();
+      checkAdminRole();
     }
   }, [user]);
+
+  const checkAdminRole = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase.rpc('has_role', {
+        _user_id: user.id,
+        _role: 'admin'
+      });
+
+      if (error) throw error;
+      
+      setIsAdmin(data);
+      
+      if (data) {
+        fetchBookings();
+      }
+    } catch (error) {
+      console.error('Error checking admin role:', error);
+      setIsAdmin(false);
+    }
+  };
 
   useEffect(() => {
     // Filter bookings based on search term
@@ -135,6 +158,31 @@ const Admin = () => {
         <Card>
           <CardContent className="p-6">
             <p>Please sign in to access the admin panel.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isAdmin === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card>
+          <CardContent className="p-6">
+            <p>Loading...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isAdmin === false) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card>
+          <CardContent className="p-6">
+            <p className="text-destructive font-semibold">Access Denied</p>
+            <p className="text-sm text-muted-foreground mt-2">You do not have admin privileges to access this page.</p>
           </CardContent>
         </Card>
       </div>
