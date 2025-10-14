@@ -25,17 +25,20 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <a href="#" className="text-foreground hover:text-parking-primary transition-colors">
+            <Link to="/" className="text-foreground hover:text-parking-primary transition-colors">
               Find Parking
-            </a>
-            <a href="#" className="text-foreground hover:text-parking-primary transition-colors">
+            </Link>
+            {user && (
+              <Link to="/my-bookings" className="text-foreground hover:text-parking-primary transition-colors flex items-center gap-1">
+                <Calendar className="w-4 h-4" />
+                My Bookings
+              </Link>
+            )}
+            <a href="#how-it-works" className="text-foreground hover:text-parking-primary transition-colors">
               How it Works
             </a>
-            <a href="#" className="text-foreground hover:text-parking-primary transition-colors">
+            <a href="#pricing" className="text-foreground hover:text-parking-primary transition-colors">
               Pricing
-            </a>
-            <a href="#" className="text-foreground hover:text-parking-primary transition-colors">
-              Support
             </a>
           </nav>
 
@@ -92,17 +95,20 @@ const Header = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-border">
             <nav className="flex flex-col space-y-4">
-              <a href="#" className="text-foreground hover:text-parking-primary transition-colors">
+              <Link to="/" className="text-foreground hover:text-parking-primary transition-colors" onClick={() => setIsMenuOpen(false)}>
                 Find Parking
-              </a>
-              <a href="#" className="text-foreground hover:text-parking-primary transition-colors">
+              </Link>
+              {user && (
+                <Link to="/my-bookings" className="text-foreground hover:text-parking-primary transition-colors flex items-center gap-1" onClick={() => setIsMenuOpen(false)}>
+                  <Calendar className="w-4 h-4" />
+                  My Bookings
+                </Link>
+              )}
+              <a href="#how-it-works" className="text-foreground hover:text-parking-primary transition-colors" onClick={() => setIsMenuOpen(false)}>
                 How it Works
               </a>
-              <a href="#" className="text-foreground hover:text-parking-primary transition-colors">
+              <a href="#pricing" className="text-foreground hover:text-parking-primary transition-colors" onClick={() => setIsMenuOpen(false)}>
                 Pricing
-              </a>
-              <a href="#" className="text-foreground hover:text-parking-primary transition-colors">
-                Support
               </a>
               <div className="flex flex-col space-y-2 pt-4 border-t border-border">
                 {user ? (
