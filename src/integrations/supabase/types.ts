@@ -363,6 +363,7 @@ export type Database = {
           _payment_id: string
           _payment_method: string
           _payment_status: string
+          _qr_code?: string
         }
         Returns: boolean
       }

@@ -78,14 +78,15 @@ serve(async (req) => {
       throw new Error('Failed to generate QR code');
     }
 
-    // Update payment status using the secure function
+    // Update payment status and QR code using the secure function
     // This bypasses RLS and can only be called by the service role
     const { data: updateResult, error: updateError } = await supabaseClient
       .rpc('update_booking_payment', {
         _booking_id: bookingId,
         _payment_id: paymentId,
         _payment_method: paymentMethod,
-        _payment_status: 'completed'
+        _payment_status: 'completed',
+        _qr_code: qrData
       });
 
     if (updateError) {
@@ -93,14 +94,8 @@ serve(async (req) => {
       throw new Error('Failed to update payment status');
     }
 
-    // Update the QR code separately
-    const { error: qrUpdateError } = await supabaseClient
-      .from('bookings')
-      .update({ qr_code: qrData })
-      .eq('id', bookingId);
-
-    if (qrUpdateError) {
-      console.error('QR update error:', qrUpdateError);
+    if (!updateResult) {
+      throw new Error('Booking not found or update failed');
     }
 
     console.log(`Payment processed successfully for booking ${bookingId}`);
