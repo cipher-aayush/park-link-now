@@ -2,7 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, MapPin, Car, Download, Star, Ticket } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Calendar, Clock, MapPin, Car, Download, Star, Ticket, XCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -31,6 +41,8 @@ const BookingHistory: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -97,6 +109,41 @@ const BookingHistory: React.FC = () => {
     return bookingDate >= today && booking.booking_status === 'active';
   };
 
+  const handleCancelBooking = (booking: Booking) => {
+    setBookingToCancel(booking);
+    setCancelDialogOpen(true);
+  };
+
+  const confirmCancelBooking = async () => {
+    if (!bookingToCancel) return;
+
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ booking_status: 'cancelled' })
+        .eq('id', bookingToCancel.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Booking Cancelled",
+        description: "Your booking has been cancelled successfully. Refund will be processed within 2-3 business days.",
+      });
+
+      // Refresh bookings
+      fetchBookings();
+      setCancelDialogOpen(false);
+      setBookingToCancel(null);
+    } catch (error) {
+      console.error('Error cancelling booking:', error);
+      toast({
+        title: "Error",
+        description: "Failed to cancel booking. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -135,6 +182,7 @@ const BookingHistory: React.FC = () => {
                 key={booking.id} 
                 booking={booking} 
                 onShowTicket={showTicket}
+                onCancelBooking={handleCancelBooking}
                 isCurrent={true}
               />
             ))}
@@ -164,6 +212,7 @@ const BookingHistory: React.FC = () => {
                 key={booking.id} 
                 booking={booking} 
                 onShowTicket={showTicket}
+                onCancelBooking={handleCancelBooking}
                 isCurrent={false}
               />
             ))}
@@ -189,6 +238,27 @@ const BookingHistory: React.FC = () => {
           onClose={() => setSelectedBooking(null)}
         />
       )}
+
+      {/* Cancel Booking Confirmation Dialog */}
+      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Booking?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel this booking? Your refund will be processed within 2-3 business days to your original payment method.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep Booking</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmCancelBooking}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Cancel Booking
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
@@ -197,10 +267,11 @@ const BookingHistory: React.FC = () => {
 interface BookingCardProps {
   booking: Booking;
   onShowTicket: (booking: Booking) => void;
+  onCancelBooking: (booking: Booking) => void;
   isCurrent: boolean;
 }
 
-const BookingCard: React.FC<BookingCardProps> = ({ booking, onShowTicket, isCurrent }) => {
+const BookingCard: React.FC<BookingCardProps> = ({ booking, onShowTicket, onCancelBooking, isCurrent }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
@@ -301,6 +372,17 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onShowTicket, isCurr
               >
                 <Ticket className="w-3 h-3" />
                 View Ticket
+              </Button>
+            )}
+            {booking.booking_status === 'active' && booking.payment_status === 'completed' && (
+              <Button 
+                variant="destructive" 
+                size="sm" 
+                onClick={() => onCancelBooking(booking)}
+                className="gap-1"
+              >
+                <XCircle className="w-3 h-3" />
+                Cancel
               </Button>
             )}
             {booking.booking_status === 'completed' && (
