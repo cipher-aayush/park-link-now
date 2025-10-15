@@ -38,10 +38,25 @@ const ParkingResults = () => {
   const date = searchParams.get('date') || '';
   const time = searchParams.get('time') || '';
   const duration = searchParams.get('duration') || '';
+  const lat = parseFloat(searchParams.get('lat') || '0');
+  const lng = parseFloat(searchParams.get('lng') || '0');
 
   useEffect(() => {
     fetchParkingLocations();
-  }, []);
+  }, [lat, lng]);
+
+  // Calculate distance between two coordinates in km
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
 
   const fetchParkingLocations = async () => {
     try {
@@ -58,7 +73,20 @@ const ParkingResults = () => {
           description: "Failed to load parking locations"
         });
       } else {
-        setLocations(data || []);
+        // Filter locations within 10km radius if coordinates are provided
+        let filteredData = data || [];
+        
+        if (lat && lng) {
+          filteredData = filteredData
+            .map(location => ({
+              ...location,
+              distance: calculateDistance(lat, lng, location.latitude, location.longitude)
+            }))
+            .filter(location => location.distance <= 10) // Within 10km
+            .sort((a, b) => a.distance - b.distance); // Sort by distance
+        }
+        
+        setLocations(filteredData);
       }
     } catch (error) {
       console.error('Error:', error);
