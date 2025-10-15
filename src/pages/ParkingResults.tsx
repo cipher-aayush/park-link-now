@@ -21,6 +21,7 @@ interface ParkingLocation {
   available_slots: number;
   price_per_hour: number;
   features: string[];
+  distance?: number;
 }
 
 const ParkingResults = () => {
@@ -73,7 +74,7 @@ const ParkingResults = () => {
           description: "Failed to load parking locations"
         });
       } else {
-        // Filter locations within 10km radius if coordinates are provided
+        // Filter locations within 50km radius if coordinates are provided
         let filteredData = data || [];
         
         if (lat && lng) {
@@ -82,8 +83,24 @@ const ParkingResults = () => {
               ...location,
               distance: calculateDistance(lat, lng, location.latitude, location.longitude)
             }))
-            .filter(location => location.distance <= 10) // Within 10km
+            .filter(location => location.distance <= 50) // Within 50km
             .sort((a, b) => a.distance - b.distance); // Sort by distance
+          
+          // If no results within 50km, show closest 3 locations
+          if (filteredData.length === 0 && data.length > 0) {
+            filteredData = data
+              .map(location => ({
+                ...location,
+                distance: calculateDistance(lat, lng, location.latitude, location.longitude)
+              }))
+              .sort((a, b) => a.distance - b.distance)
+              .slice(0, 3);
+            
+            toast({
+              title: "No nearby parking found",
+              description: "Showing the closest available parking locations",
+            });
+          }
         }
         
         setLocations(filteredData);
@@ -198,6 +215,17 @@ const ParkingResults = () => {
               </CardHeader>
               
               <CardContent className="space-y-4">
+                {location.distance && (
+                  <div className="bg-muted/50 rounded-lg p-2 mb-2">
+                    <p className="text-sm text-muted-foreground">
+                      <MapPin className="h-3 w-3 inline mr-1" />
+                      {location.distance < 1 
+                        ? `${(location.distance * 1000).toFixed(0)}m away`
+                        : `${location.distance.toFixed(1)}km away`}
+                    </p>
+                  </div>
+                )}
+                
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-2xl font-bold text-parking-primary">₹{location.price_per_hour}</p>
