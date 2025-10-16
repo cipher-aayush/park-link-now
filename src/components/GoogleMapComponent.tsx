@@ -48,10 +48,15 @@ const GoogleMapComponent = ({
           return;
         }
 
-        // For now, use a simple approach - load with a placeholder key
-        // In production, replace with your actual Google Maps API key
+        const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+        
+        if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') {
+          console.warn('Google Maps API key not configured');
+          return;
+        }
+        
         const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places`;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
         script.async = true;
         script.defer = true;
         script.onload = () => setIsMapLoaded(true);

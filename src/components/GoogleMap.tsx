@@ -42,8 +42,15 @@ const GoogleMap = ({ locations, onLocationSelect, selectedLocation, center }: Go
   // Initialize Google Maps
   useEffect(() => {
     const initializeMap = async () => {
+      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+      
+      if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') {
+        console.warn('Google Maps API key not configured');
+        return;
+      }
+      
       const loader = new Loader({
-        apiKey: 'AIzaSyBNEczqmjGVUvFqlnp8z1jj4fYXlsRVIhI', // Using demo key, replace with real one
+        apiKey,
         version: 'weekly',
         libraries: ['places', 'geometry']
       });
