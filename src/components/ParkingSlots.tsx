@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Star, Car, Shield, Zap, Camera } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-
+import GoogleMapComponent from "./GoogleMapComponent";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -106,9 +106,13 @@ const ParkingSlots = () => {
           </div>
         </div>
 
-        {showMap && (
-          <div className="mb-12 p-4 text-center bg-muted rounded-lg">
-            <p className="text-muted-foreground">Map feature will be available with Google Maps integration.</p>
+        {showMap && locations.length > 0 && (
+          <div className="mb-12">
+            <GoogleMapComponent
+              locations={locations}
+              selectedLocation={selectedLocation}
+              onLocationSelect={setSelectedLocation}
+            />
           </div>
         )}
 
