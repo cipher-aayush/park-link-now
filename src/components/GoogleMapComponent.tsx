@@ -103,32 +103,43 @@ const GoogleMapComponent = ({
     locations.forEach((location) => {
       const position = { lat: location.latitude, lng: location.longitude };
       
+      // Enhanced parking sign marker
       const marker = new google.maps.Marker({
         position,
         map: map.current,
         title: location.name,
+        animation: google.maps.Animation.DROP,
         icon: {
           url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="16" cy="16" r="12" fill="#1e40af" stroke="white" stroke-width="3"/>
-              <text x="16" y="20" font-family="Arial" font-size="10" font-weight="bold" fill="white" text-anchor="middle">P</text>
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+                </filter>
+              </defs>
+              <circle cx="20" cy="20" r="16" fill="#2563eb" stroke="#ffffff" stroke-width="3" filter="url(#shadow)"/>
+              <text x="20" y="27" font-family="Arial" font-size="16" font-weight="bold" fill="#ffffff" text-anchor="middle">P</text>
+              <circle cx="20" cy="20" r="16" fill="none" stroke="#60a5fa" stroke-width="1" opacity="0.5"/>
             </svg>
           `),
-          scaledSize: new google.maps.Size(32, 32),
+          scaledSize: new google.maps.Size(40, 40),
+          anchor: new google.maps.Point(20, 20)
         }
       });
 
       const infoWindow = new google.maps.InfoWindow({
         content: `
-          <div style="padding: 8px; min-width: 200px;">
-            <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold;">${location.name}</h3>
-            <p style="margin: 0 0 8px 0; font-size: 12px; color: #666;">${location.address}</p>
-            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px;">
-              <span>Available: <strong style="color: #10b981;">${location.available_slots}/${location.total_slots}</strong></span>
-              <span>Price: <strong>₹${location.price_per_hour}/hr</strong></span>
+          <div style="padding: 12px; min-width: 220px; font-family: system-ui;">
+            <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold; color: #1e293b;">${location.name}</h3>
+            <p style="margin: 0 0 12px 0; font-size: 13px; color: #64748b; line-height: 1.4;">${location.address}</p>
+            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 12px; padding: 8px; background: #f8fafc; border-radius: 6px;">
+              <span style="color: #475569;">Available: <strong style="color: #10b981;">${location.available_slots}/${location.total_slots}</strong></span>
+              <span style="color: #475569;">Price: <strong style="color: #2563eb;">₹${location.price_per_hour}/hr</strong></span>
             </div>
             <button onclick="window.selectParkingLocation('${location.id}')" 
-                    style="width: 100%; padding: 6px 12px; background: #1e40af; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    style="width: 100%; padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s;"
+                    onmouseover="this.style.background='#1d4ed8'"
+                    onmouseout="this.style.background='#2563eb'">
               Select Location
             </button>
           </div>
@@ -154,6 +165,14 @@ const GoogleMapComponent = ({
     // Fit map to show all locations
     if (locations.length > 0) {
       map.current?.fitBounds(bounds);
+      // Ensure proper zoom level for single location or many locations
+      const listener = google.maps.event.addListenerOnce(map.current!, 'bounds_changed', () => {
+        if (locations.length === 1) {
+          map.current?.setZoom(15);
+        } else if (map.current!.getZoom()! > 16) {
+          map.current?.setZoom(16);
+        }
+      });
     }
   }, [map.current, locations, onLocationSelect]);
 

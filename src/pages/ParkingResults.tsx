@@ -74,33 +74,41 @@ const ParkingResults = () => {
           description: "Failed to load parking locations"
         });
       } else {
-        // Filter locations within 50km radius if coordinates are provided
-        let filteredData = data || [];
+        // Calculate distance for all locations if coordinates are provided
+        let filteredData: ParkingLocation[] = data || [];
         
         if (lat && lng) {
-          filteredData = filteredData
-            .map(location => ({
-              ...location,
-              distance: calculateDistance(lat, lng, location.latitude, location.longitude)
-            }))
-            .filter(location => location.distance <= 50) // Within 50km
-            .sort((a, b) => a.distance - b.distance); // Sort by distance
+          const locationsWithDistance = filteredData.map(location => ({
+            ...location,
+            distance: calculateDistance(lat, lng, location.latitude, location.longitude)
+          }));
           
-          // If no results within 50km, show closest 3 locations
-          if (filteredData.length === 0 && data.length > 0) {
-            filteredData = data
-              .map(location => ({
-                ...location,
-                distance: calculateDistance(lat, lng, location.latitude, location.longitude)
-              }))
-              .sort((a, b) => a.distance - b.distance)
-              .slice(0, 3);
-            
+          // Sort by distance
+          locationsWithDistance.sort((a, b) => a.distance! - b.distance!);
+          
+          // Filter within 100km for display
+          const nearbyLocations = locationsWithDistance.filter(location => location.distance! <= 100);
+          
+          if (nearbyLocations.length === 0) {
+            // Show closest 5 locations if none within 100km
+            filteredData = locationsWithDistance.slice(0, 5);
             toast({
-              title: "No nearby parking found",
-              description: "Showing the closest available parking locations",
+              title: "Showing nearest parking",
+              description: "No parking found within 100km. Showing closest available locations.",
+            });
+          } else {
+            filteredData = nearbyLocations;
+            toast({
+              title: "Parking locations found",
+              description: `Found ${nearbyLocations.length} parking location(s) near your search area`,
             });
           }
+        } else {
+          // Show all locations if no search coordinates
+          toast({
+            title: "All parking locations",
+            description: `Showing ${filteredData.length} parking locations across India`,
+          });
         }
         
         setLocations(filteredData);
@@ -190,6 +198,8 @@ const ParkingResults = () => {
                 setSelectedLocation(location);
                 setShowBookingModal(true);
               }}
+              center={lat && lng ? { lat, lng } : undefined}
+              zoom={lat && lng ? 12 : 5}
             />
           </div>
         )}

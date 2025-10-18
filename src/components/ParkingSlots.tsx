@@ -112,6 +112,8 @@ const ParkingSlots = () => {
               locations={locations}
               selectedLocation={selectedLocation}
               onLocationSelect={setSelectedLocation}
+              center={{ lat: 20.5937, lng: 78.9629 }}
+              zoom={5}
             />
           </div>
         )}
