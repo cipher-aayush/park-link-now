@@ -8,6 +8,37 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+const signUpSchema = z.object({
+  fullName: z.string()
+    .trim()
+    .min(2, { message: "Name must be at least 2 characters" })
+    .max(100, { message: "Name must be less than 100 characters" })
+    .regex(/^[a-zA-Z\s]+$/, { message: "Name can only contain letters and spaces" }),
+  email: z.string()
+    .trim()
+    .email({ message: "Invalid email address" })
+    .max(255, { message: "Email must be less than 255 characters" }),
+  phone: z.string()
+    .trim()
+    .min(10, { message: "Phone number must be at least 10 digits" })
+    .max(15, { message: "Phone number must be less than 15 digits" })
+    .regex(/^[0-9+\s()-]+$/, { message: "Invalid phone number format" }),
+  password: z.string()
+    .min(8, { message: "Password must be at least 8 characters" })
+    .max(100, { message: "Password must be less than 100 characters" })
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, { 
+      message: "Password must contain at least one uppercase letter, one lowercase letter, and one number" 
+    }),
+  confirmPassword: z.string(),
+  agreeToTerms: z.boolean().refine(val => val === true, {
+    message: "You must agree to the terms and conditions"
+  })
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
 
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -28,13 +59,19 @@ const SignUp = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      toast({
-        variant: "destructive",
-        title: "Password mismatch",
-        description: "Passwords do not match. Please try again."
-      });
-      return;
+    
+    // Validate form data
+    try {
+      signUpSchema.parse(formData);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({
+          variant: "destructive",
+          title: "Validation Error",
+          description: error.errors[0].message
+        });
+        return;
+      }
     }
     
     setLoading(true);
@@ -42,7 +79,6 @@ const SignUp = () => {
     setLoading(false);
     
     if (!error) {
-      // Redirect to sign in page
       navigate('/sign-in');
     }
   };

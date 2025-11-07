@@ -11,6 +11,29 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import PaymentModal from './PaymentModal';
 import ParkingTicket from './ParkingTicket';
+import { z } from 'zod';
+
+const bookingSchema = z.object({
+  date: z.string()
+    .refine((date) => {
+      const selectedDate = new Date(date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return selectedDate >= today;
+    }, { message: "Date cannot be in the past" }),
+  startTime: z.string()
+    .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, { message: "Invalid time format" }),
+  duration: z.string()
+    .refine((val) => {
+      const num = parseInt(val);
+      return !isNaN(num) && num > 0 && num <= 168;
+    }, { message: "Duration must be between 1 and 168 hours" }),
+  vehicleNumber: z.string()
+    .trim()
+    .min(5, { message: "Vehicle number must be at least 5 characters" })
+    .max(15, { message: "Vehicle number must be less than 15 characters" })
+    .regex(/^[A-Z0-9\s-]+$/, { message: "Vehicle number must contain only uppercase letters, numbers, spaces, and hyphens" })
+});
 
 interface ParkingLocation {
   id: string;
@@ -72,13 +95,18 @@ const BookingModal = ({ isOpen, onClose, location, prefilledDate, prefilledTime,
       return;
     }
 
-    if (!bookingData.vehicleNumber.trim()) {
-      toast({
-        variant: "destructive",
-        title: "Vehicle number required",
-        description: "Please enter your vehicle number"
-      });
-      return;
+    // Validate booking data
+    try {
+      bookingSchema.parse(bookingData);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({
+          variant: "destructive",
+          title: "Validation Error",
+          description: error.errors[0].message
+        });
+        return;
+      }
     }
 
     setLoading(true);

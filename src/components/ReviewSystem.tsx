@@ -9,6 +9,20 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
+import { z } from 'zod';
+
+const reviewSchema = z.object({
+  rating: z.number()
+    .min(1, { message: "Rating must be at least 1 star" })
+    .max(5, { message: "Rating cannot exceed 5 stars" }),
+  comment: z.string()
+    .trim()
+    .min(10, { message: "Review must be at least 10 characters" })
+    .max(1000, { message: "Review must be less than 1000 characters" })
+    .refine((val) => !/[<>{}]/.test(val), {
+      message: "Review contains invalid characters"
+    })
+});
 
 interface Review {
   id: string;
@@ -69,13 +83,18 @@ const ReviewSystem: React.FC<ReviewSystemProps> = ({
       return;
     }
 
-    if (!newReview.comment.trim()) {
-      toast({
-        title: "Comment required",
-        description: "Please add a comment with your review",
-        variant: "destructive",
-      });
-      return;
+    // Validate review data
+    try {
+      reviewSchema.parse(newReview);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Validation Error",
+          description: error.errors[0].message,
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     setLoading(true);
