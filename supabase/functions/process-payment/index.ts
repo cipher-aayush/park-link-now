@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -39,13 +40,35 @@ serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    const { bookingId, paymentMethod } = await req.json();
+    // Validate input with Zod
+    const paymentRequestSchema = z.object({
+      bookingId: z.string().uuid('Invalid booking ID format'),
+      paymentMethod: z.enum(['upi', 'card', 'qr'], {
+        errorMap: () => ({ message: 'Payment method must be upi, card, or qr' })
+      })
+    });
+
+    const body = await req.json();
+    const validation = paymentRequestSchema.safeParse(body);
+
+    if (!validation.success) {
+      console.error('Validation error:', validation.error.errors);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Invalid request data',
+          details: validation.error.errors[0].message
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    const { bookingId, paymentMethod } = validation.data;
     
     console.log(`Processing payment for booking ${bookingId}, user ${user.id}, method: ${paymentMethod}`);
-
-    if (!bookingId || !paymentMethod) {
-      throw new Error('Missing required fields: bookingId and paymentMethod');
-    }
 
     // Verify the booking belongs to the user
     const { data: booking, error: bookingError } = await supabaseClient
