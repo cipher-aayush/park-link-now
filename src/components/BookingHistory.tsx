@@ -54,7 +54,7 @@ const BookingHistory: React.FC = () => {
 
   const fetchBookings = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('bookings')
         .select(`
           *,
@@ -118,7 +118,7 @@ const BookingHistory: React.FC = () => {
     if (!bookingToCancel) return;
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('bookings')
         .update({ booking_status: 'cancelled' })
         .eq('id', bookingToCancel.id);

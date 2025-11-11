@@ -38,7 +38,7 @@ const FavoriteLocations: React.FC = () => {
 
   const fetchFavorites = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('favorites')
         .select(`
           *,
@@ -74,7 +74,7 @@ const FavoriteLocations: React.FC = () => {
 
   const removeFavorite = async (parkingLocationId: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('favorites')
         .delete()
         .eq('user_id', user?.id)

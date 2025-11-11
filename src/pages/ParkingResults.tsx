@@ -61,7 +61,7 @@ const ParkingResults = () => {
 
   const fetchParkingLocations = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('parking_locations')
         .select('*')
         .order('name');

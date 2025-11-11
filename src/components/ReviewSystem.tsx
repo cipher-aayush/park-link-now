@@ -59,7 +59,7 @@ const ReviewSystem: React.FC<ReviewSystemProps> = ({
 
   const fetchReviews = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('reviews')
         .select('*')
         .eq('parking_location_id', parkingLocationId)
@@ -99,7 +99,7 @@ const ReviewSystem: React.FC<ReviewSystemProps> = ({
 
     setLoading(true);
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('reviews')
         .insert({
           user_id: user.id,

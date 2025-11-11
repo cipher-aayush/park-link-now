@@ -31,7 +31,7 @@ const NotificationCenter: React.FC = () => {
 
   const fetchNotifications = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('notifications')
         .select('*')
         .eq('user_id', user?.id)
@@ -71,7 +71,7 @@ const NotificationCenter: React.FC = () => {
 
   const markAsRead = async (notificationId: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('notifications')
         .update({ is_read: true })
         .eq('id', notificationId);
@@ -90,7 +90,7 @@ const NotificationCenter: React.FC = () => {
 
   const markAllAsRead = async () => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('notifications')
         .update({ is_read: true })
         .eq('user_id', user?.id)
@@ -108,7 +108,7 @@ const NotificationCenter: React.FC = () => {
 
   const deleteNotification = async (notificationId: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('notifications')
         .delete()
         .eq('id', notificationId);

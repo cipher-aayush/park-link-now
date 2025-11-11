@@ -25,7 +25,7 @@ const DarkModeToggle: React.FC = () => {
 
   const loadUserPreference = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('user_preferences')
         .select('dark_mode')
         .eq('user_id', user?.id)
@@ -56,7 +56,7 @@ const DarkModeToggle: React.FC = () => {
     if (!user) return;
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('user_preferences')
         .upsert(
           { user_id: user.id, dark_mode: isDark },

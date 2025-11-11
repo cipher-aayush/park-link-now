@@ -103,7 +103,7 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, bookingId, amount }: Payment
       });
 
       // Fetch updated booking
-      const { data: updatedBooking } = await supabase
+      const { data: updatedBooking } = await (supabase as any)
         .from('bookings')
         .select('*')
         .eq('id', bookingId)

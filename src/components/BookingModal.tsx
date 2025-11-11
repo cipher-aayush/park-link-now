@@ -112,7 +112,7 @@ const BookingModal = ({ isOpen, onClose, location, prefilledDate, prefilledTime,
     setLoading(true);
 
     try {
-      const { data: booking, error } = await supabase
+      const { data: booking, error } = await (supabase as any)
         .from('bookings')
         .insert({
           user_id: user.id,
@@ -130,7 +130,7 @@ const BookingModal = ({ isOpen, onClose, location, prefilledDate, prefilledTime,
 
       if (error) throw error;
 
-      setBookingId(booking.id);
+      setBookingId(booking?.id);
       setPaymentModalOpen(true);
       
       toast({

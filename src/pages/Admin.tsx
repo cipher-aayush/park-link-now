@@ -58,7 +58,7 @@ const Admin = () => {
     if (!user) return;
     
     try {
-      const { data, error } = await supabase.rpc('has_role', {
+      const { data, error } = await (supabase as any).rpc('has_role', {
         _user_id: user.id,
         _role: 'admin'
       });
@@ -88,7 +88,7 @@ const Admin = () => {
 
   const fetchBookings = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('bookings')
         .select(`
           *,
@@ -111,9 +111,9 @@ const Admin = () => {
       const today = new Date().toISOString().split('T')[0];
       const stats = {
         totalBookings: data?.length || 0,
-        totalRevenue: data?.reduce((sum, booking) => sum + (booking.total_amount || 0), 0) || 0,
-        activeBookings: data?.filter(booking => booking.booking_status === 'active').length || 0,
-        todayBookings: data?.filter(booking => booking.booking_date === today).length || 0
+        totalRevenue: data?.reduce((sum: number, booking: any) => sum + (booking.total_amount || 0), 0) || 0,
+        activeBookings: data?.filter((booking: any) => booking.booking_status === 'active').length || 0,
+        todayBookings: data?.filter((booking: any) => booking.booking_date === today).length || 0
       };
       setStats(stats);
 
