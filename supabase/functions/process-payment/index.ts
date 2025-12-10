@@ -83,42 +83,27 @@ serve(async (req) => {
       throw new Error('Booking not found or unauthorized');
     }
 
-    // TODO: Integrate with real payment gateway (Stripe/Razorpay/PayU)
-    // For now, simulate payment processing with validation
-    
     // Simulate payment processing delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 1500));
     
-    // Generate payment ID (in production, this would come from the payment gateway)
+    // Generate payment ID
     const paymentId = `PAY_${Date.now()}_${bookingId.substring(0, 8)}`;
     
-    // Generate QR code data using the secure RPC function
-    const { data: qrData, error: qrError } = await supabaseClient
-      .rpc('generate_booking_qr', { booking_id: bookingId });
-
-    if (qrError) {
-      console.error('QR generation error:', qrError);
-      throw new Error('Failed to generate QR code');
-    }
-
-    // Update payment status and QR code using the secure function
-    // This bypasses RLS and can only be called by the service role
-    const { data: updateResult, error: updateError } = await supabaseClient
-      .rpc('update_booking_payment', {
-        _booking_id: bookingId,
-        _payment_id: paymentId,
-        _payment_method: paymentMethod,
-        _payment_status: 'completed',
-        _qr_code: qrData
-      });
+    // Update booking with payment status using service role (bypasses RLS)
+    const { data: updatedBooking, error: updateError } = await supabaseClient
+      .from('bookings')
+      .update({
+        payment_status: 'completed',
+        booking_status: 'confirmed'
+      })
+      .eq('id', bookingId)
+      .eq('user_id', user.id)
+      .select()
+      .single();
 
     if (updateError) {
       console.error('Payment update error:', updateError);
       throw new Error('Failed to update payment status');
-    }
-
-    if (!updateResult) {
-      throw new Error('Booking not found or update failed');
     }
 
     console.log(`Payment processed successfully for booking ${bookingId}`);
@@ -127,7 +112,7 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         payment_id: paymentId,
-        qr_code: qrData,
+        booking: updatedBooking,
         message: 'Payment processed successfully'
       }),
       {
