@@ -116,13 +116,14 @@ const BookingModal = ({ isOpen, onClose, location, prefilledDate, prefilledTime,
         .from('bookings')
         .insert({
           user_id: user.id,
-          parking_location_id: location.id,
+          location_id: location.id,
           booking_date: bookingData.date,
           start_time: bookingData.startTime,
           end_time: calculateEndTime(),
-          duration_hours: parseInt(bookingData.duration),
           total_amount: calculateTotal(),
           vehicle_number: bookingData.vehicleNumber,
+          vehicle_type: 'car',
+          booking_status: 'pending',
           payment_status: 'pending'
         })
         .select()
