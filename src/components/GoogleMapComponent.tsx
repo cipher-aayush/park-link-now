@@ -13,7 +13,7 @@ interface ParkingLocation {
   available_slots: number;
   total_slots: number;
   price_per_hour: number;
-  features: string[];
+  amenities: string[];
 }
 
 interface GoogleMapComponentProps {

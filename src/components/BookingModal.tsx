@@ -44,7 +44,7 @@ interface ParkingLocation {
   available_slots: number;
   total_slots: number;
   price_per_hour: number;
-  features: string[];
+  amenities: string[];
 }
 
 interface BookingModalProps {
@@ -200,13 +200,13 @@ const BookingModal = ({ isOpen, onClose, location, prefilledDate, prefilledTime,
                     <span className="ml-2">₹{location.price_per_hour}/hour</span>
                   </div>
                 </div>
-                {location.features.length > 0 && (
+                {(location.amenities || []).length > 0 && (
                   <div className="mt-4">
-                    <span className="font-medium text-sm">Features:</span>
+                    <span className="font-medium text-sm">Amenities:</span>
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {location.features.map((feature, index) => (
+                      {(location.amenities || []).map((amenity, index) => (
                         <span key={index} className="px-2 py-1 bg-secondary text-secondary-foreground rounded-full text-xs">
-                          {feature}
+                          {amenity}
                         </span>
                       ))}
                     </div>
