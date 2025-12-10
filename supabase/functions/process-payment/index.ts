@@ -108,6 +108,34 @@ serve(async (req) => {
 
     console.log(`Payment processed successfully for booking ${bookingId}`);
 
+    // Send booking confirmation email
+    try {
+      const userEmail = user.email;
+      const userName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Customer';
+      
+      if (userEmail) {
+        const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+        const emailResponse = await fetch(`${supabaseUrl}/functions/v1/send-booking-confirmation`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+          },
+          body: JSON.stringify({
+            bookingId,
+            userEmail,
+            userName,
+          }),
+        });
+        
+        const emailResult = await emailResponse.json();
+        console.log('Email notification result:', emailResult);
+      }
+    } catch (emailError) {
+      // Don't fail the payment if email fails
+      console.error('Failed to send confirmation email:', emailError);
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
