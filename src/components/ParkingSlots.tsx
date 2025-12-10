@@ -17,7 +17,7 @@ interface ParkingLocation {
   total_slots: number;
   available_slots: number;
   price_per_hour: number;
-  features: string[];
+  amenities: string[];
 }
 
 
@@ -154,13 +154,13 @@ const ParkingSlots = () => {
                 </div>
 
                 <div className="flex flex-wrap gap-1">
-                  {location.features.map((feature, index) => (
+                  {(location.amenities || []).map((amenity, index) => (
                     <Badge key={index} variant="secondary" className="text-xs">
-                      {feature === "Security" && <Shield className="h-3 w-3 mr-1" />}
-                      {feature === "CCTV" && <Camera className="h-3 w-3 mr-1" />}
-                      {feature === "Covered" && <Car className="h-3 w-3 mr-1" />}
-                      {feature === "EV Charging" && <Zap className="h-3 w-3 mr-1" />}
-                      {feature}
+                      {amenity === "Security" && <Shield className="h-3 w-3 mr-1" />}
+                      {amenity === "CCTV" && <Camera className="h-3 w-3 mr-1" />}
+                      {amenity === "Covered" && <Car className="h-3 w-3 mr-1" />}
+                      {amenity === "EV Charging" && <Zap className="h-3 w-3 mr-1" />}
+                      {amenity}
                     </Badge>
                   ))}
                 </div>
