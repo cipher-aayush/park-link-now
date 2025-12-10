@@ -14,16 +14,273 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bookings: {
+        Row: {
+          booking_date: string
+          booking_status: string
+          created_at: string
+          end_time: string
+          id: string
+          location_id: string
+          payment_status: string
+          start_time: string
+          total_amount: number
+          updated_at: string
+          user_id: string
+          vehicle_number: string
+          vehicle_type: string
+        }
+        Insert: {
+          booking_date: string
+          booking_status?: string
+          created_at?: string
+          end_time: string
+          id?: string
+          location_id: string
+          payment_status?: string
+          start_time: string
+          total_amount: number
+          updated_at?: string
+          user_id: string
+          vehicle_number: string
+          vehicle_type?: string
+        }
+        Update: {
+          booking_date?: string
+          booking_status?: string
+          created_at?: string
+          end_time?: string
+          id?: string
+          location_id?: string
+          payment_status?: string
+          start_time?: string
+          total_amount?: number
+          updated_at?: string
+          user_id?: string
+          vehicle_number?: string
+          vehicle_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "parking_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      favorites: {
+        Row: {
+          created_at: string
+          id: string
+          location_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "parking_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      parking_locations: {
+        Row: {
+          address: string
+          amenities: string[] | null
+          available_slots: number
+          city: string
+          created_at: string
+          id: string
+          image_url: string | null
+          latitude: number
+          longitude: number
+          name: string
+          price_per_hour: number
+          rating: number | null
+          state: string
+          total_slots: number
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          amenities?: string[] | null
+          available_slots?: number
+          city: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          latitude: number
+          longitude: number
+          name: string
+          price_per_hour?: number
+          rating?: number | null
+          state: string
+          total_slots?: number
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          amenities?: string[] | null
+          available_slots?: number
+          city?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          latitude?: number
+          longitude?: number
+          name?: string
+          price_per_hour?: number
+          rating?: number | null
+          state?: string
+          total_slots?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          location_id: string
+          rating: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          location_id: string
+          rating: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          location_id?: string
+          rating?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "parking_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_preferences: {
+        Row: {
+          created_at: string
+          dark_mode: boolean
+          id: string
+          notifications_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dark_mode?: boolean
+          id?: string
+          notifications_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dark_mode?: boolean
+          id?: string
+          notifications_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +407,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const
