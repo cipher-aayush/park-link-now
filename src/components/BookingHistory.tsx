@@ -114,33 +114,50 @@ const BookingHistory: React.FC = () => {
     setCancelDialogOpen(true);
   };
 
-  const confirmCancelBooking = async () => {
-    if (!bookingToCancel) return;
+  const [cancelling, setCancelling] = useState(false);
+  const [refundInfo, setRefundInfo] = useState<{ refundPercentage: number; refundAmount: number; reason: string } | null>(null);
 
+  const confirmCancelBooking = async () => {
+    if (!bookingToCancel || !user) return;
+
+    setCancelling(true);
     try {
-      const { error } = await (supabase as any)
-        .from('bookings')
-        .update({ booking_status: 'cancelled' })
-        .eq('id', bookingToCancel.id);
+      const { data, error } = await supabase.functions.invoke('cancel-booking', {
+        body: {
+          bookingId: bookingToCancel.id,
+          userId: user.id,
+          userEmail: user.email
+        }
+      });
 
       if (error) throw error;
 
-      toast({
-        title: "Booking Cancelled",
-        description: "Your booking has been cancelled successfully. Refund will be processed within 2-3 business days.",
-      });
+      if (data.success) {
+        setRefundInfo(data.refund);
+        toast({
+          title: "Booking Cancelled",
+          description: data.refund.refundAmount > 0 
+            ? `Refund of ₹${data.refund.refundAmount} (${data.refund.refundPercentage}%) will be processed within 2-3 business days.`
+            : "Your booking has been cancelled. Unfortunately, no refund is available for late cancellations.",
+        });
 
-      // Refresh bookings
-      fetchBookings();
-      setCancelDialogOpen(false);
-      setBookingToCancel(null);
-    } catch (error) {
+        // Refresh bookings
+        fetchBookings();
+        setCancelDialogOpen(false);
+        setBookingToCancel(null);
+        setRefundInfo(null);
+      } else {
+        throw new Error(data.error || 'Cancellation failed');
+      }
+    } catch (error: any) {
       console.error('Error cancelling booking:', error);
       toast({
         title: "Error",
-        description: "Failed to cancel booking. Please try again.",
+        description: error.message || "Failed to cancel booking. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -240,21 +257,42 @@ const BookingHistory: React.FC = () => {
       )}
 
       {/* Cancel Booking Confirmation Dialog */}
-      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+      <AlertDialog open={cancelDialogOpen} onOpenChange={(open) => {
+        if (!cancelling) {
+          setCancelDialogOpen(open);
+          if (!open) setBookingToCancel(null);
+        }
+      }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Cancel Booking?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to cancel this booking? Your refund will be processed within 2-3 business days to your original payment method.
+            <AlertDialogDescription className="space-y-3">
+              <p>Are you sure you want to cancel this booking?</p>
+              <div className="bg-muted p-3 rounded-md text-sm space-y-1">
+                <p className="font-semibold">Refund Policy:</p>
+                <ul className="list-disc pl-4 space-y-1">
+                  <li>More than 24 hours before: <span className="text-green-600 font-medium">100% refund</span></li>
+                  <li>12-24 hours before: <span className="text-green-600 font-medium">75% refund</span></li>
+                  <li>6-12 hours before: <span className="text-yellow-600 font-medium">50% refund</span></li>
+                  <li>2-6 hours before: <span className="text-orange-600 font-medium">25% refund</span></li>
+                  <li>Less than 2 hours: <span className="text-red-600 font-medium">No refund</span></li>
+                </ul>
+              </div>
+              {bookingToCancel && (
+                <p className="text-sm">
+                  Booking amount: <span className="font-bold">₹{bookingToCancel.total_amount}</span>
+                </p>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Keep Booking</AlertDialogCancel>
+            <AlertDialogCancel disabled={cancelling}>Keep Booking</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmCancelBooking}
               className="bg-red-600 hover:bg-red-700"
+              disabled={cancelling}
             >
-              Cancel Booking
+              {cancelling ? "Cancelling..." : "Cancel Booking"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
