@@ -63,7 +63,8 @@ const BookingModal = ({ isOpen, onClose, location, prefilledDate, prefilledTime,
     date: prefilledDate || new Date().toISOString().split('T')[0],
     startTime: prefilledTime || '09:00',
     duration: prefilledDuration || '2',
-    vehicleNumber: ''
+    vehicleNumber: '',
+    vehicleType: 'car' as 'car' | 'bike'
   });
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
@@ -73,7 +74,13 @@ const BookingModal = ({ isOpen, onClose, location, prefilledDate, prefilledTime,
 
   const calculateTotal = () => {
     if (!location) return 0;
-    return location.price_per_hour * parseInt(bookingData.duration);
+    const rate = bookingData.vehicleType === 'bike' ? location.price_per_hour * 0.5 : location.price_per_hour;
+    return rate * parseInt(bookingData.duration);
+  };
+
+  const getRate = () => {
+    if (!location) return 0;
+    return bookingData.vehicleType === 'bike' ? location.price_per_hour * 0.5 : location.price_per_hour;
   };
 
   const calculateEndTime = () => {
@@ -122,7 +129,7 @@ const BookingModal = ({ isOpen, onClose, location, prefilledDate, prefilledTime,
           end_time: calculateEndTime(),
           total_amount: calculateTotal(),
           vehicle_number: bookingData.vehicleNumber,
-          vehicle_type: 'car',
+          vehicle_type: bookingData.vehicleType,
           booking_status: 'pending',
           payment_status: 'pending'
         })
@@ -280,17 +287,34 @@ const BookingModal = ({ isOpen, onClose, location, prefilledDate, prefilledTime,
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="vehicleNumber" className="flex items-center space-x-1">
-                    <Car className="h-4 w-4" />
-                    <span>Vehicle Number</span>
-                  </Label>
-                  <Input
-                    id="vehicleNumber"
-                    placeholder="e.g., DL 01 AB 1234"
-                    value={bookingData.vehicleNumber}
-                    onChange={(e) => setBookingData(prev => ({ ...prev, vehicleNumber: e.target.value.toUpperCase() }))}
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Vehicle Type</Label>
+                    <Select
+                      value={bookingData.vehicleType}
+                      onValueChange={(value: 'car' | 'bike') => setBookingData(prev => ({ ...prev, vehicleType: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="car">🚗 Car (₹{location.price_per_hour}/hr)</SelectItem>
+                        <SelectItem value="bike">🏍️ Bike (₹{location.price_per_hour * 0.5}/hr)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="vehicleNumber" className="flex items-center space-x-1">
+                      <Car className="h-4 w-4" />
+                      <span>Vehicle Number</span>
+                    </Label>
+                    <Input
+                      id="vehicleNumber"
+                      placeholder={bookingData.vehicleType === 'bike' ? "e.g., DL 01 AB 1234" : "e.g., DL 01 AB 1234"}
+                      value={bookingData.vehicleNumber}
+                      onChange={(e) => setBookingData(prev => ({ ...prev, vehicleNumber: e.target.value.toUpperCase() }))}
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -307,8 +331,12 @@ const BookingModal = ({ isOpen, onClose, location, prefilledDate, prefilledTime,
                     <span>{bookingData.duration} hour(s)</span>
                   </div>
                   <div className="flex justify-between">
+                    <span>Vehicle Type:</span>
+                    <span>{bookingData.vehicleType === 'car' ? '🚗 Car' : '🏍️ Bike'}</span>
+                  </div>
+                  <div className="flex justify-between">
                     <span>Rate:</span>
-                    <span>₹{location.price_per_hour}/hour</span>
+                    <span>₹{getRate()}/hour</span>
                   </div>
                   <div className="border-t pt-2 flex justify-between font-semibold text-lg">
                     <span>Total:</span>
