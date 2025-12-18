@@ -315,6 +315,19 @@ const BookingModal = ({ isOpen, onClose, location, prefilledDate, prefilledTime,
                     <span>₹{calculateTotal()}</span>
                   </div>
                 </div>
+                
+                {/* Overtime Charges Notice */}
+                <div className="mt-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                  <p className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-2">
+                    ⚠️ Overtime Charges Apply
+                  </p>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>• First 30 min overtime: +50% of hourly rate</li>
+                    <li>• 30 min - 1 hr overtime: +100% (full hourly rate)</li>
+                    <li>• Beyond 1 hr: +150% per additional hour</li>
+                    <li>• Beyond 3 hrs: ₹500 penalty + 200% rate</li>
+                  </ul>
+                </div>
               </CardContent>
             </Card>
 

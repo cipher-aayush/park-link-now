@@ -1,6 +1,7 @@
 import { Car, Mail, Phone, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -79,12 +80,12 @@ const Footer = () => {
             © 2024 ParkEasy. All rights reserved.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
-            <a href="#" className="text-primary-foreground/60 hover:text-parking-accent text-sm transition-colors">
+            <Link to="/privacy-policy" className="text-primary-foreground/60 hover:text-parking-accent text-sm transition-colors">
               Privacy Policy
-            </a>
-            <a href="#" className="text-primary-foreground/60 hover:text-parking-accent text-sm transition-colors">
+            </Link>
+            <Link to="/terms-of-service" className="text-primary-foreground/60 hover:text-parking-accent text-sm transition-colors">
               Terms of Service
-            </a>
+            </Link>
             <a href="#" className="text-primary-foreground/60 hover:text-parking-accent text-sm transition-colors">
               Cookie Policy
             </a>
