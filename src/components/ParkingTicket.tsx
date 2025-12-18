@@ -17,13 +17,24 @@ interface ParkingTicketProps {
     total_amount: number;
     vehicle_number: string;
     qr_code?: string;
+    slot_number?: string;
   };
   onClose: () => void;
 }
 
+// Generate a parking slot number based on booking id
+const generateSlotNumber = (bookingId: string): string => {
+  const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+  const hash = bookingId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const row = rows[hash % rows.length];
+  const number = (hash % 20) + 1;
+  return `${row}${number}`;
+};
+
 const ParkingTicket = ({ booking, onClose }: ParkingTicketProps) => {
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
   const { toast } = useToast();
+  const slotNumber = booking.slot_number || generateSlotNumber(booking.id);
 
   React.useEffect(() => {
     generateQRCode();
@@ -36,7 +47,8 @@ const ParkingTicket = ({ booking, onClose }: ParkingTicketProps) => {
         location: booking.location_name,
         date: booking.date,
         time: booking.start_time,
-        vehicle: booking.vehicle_number
+        vehicle: booking.vehicle_number,
+        slot: slotNumber
       };
       
       const qrUrl = await QRCode.toDataURL(JSON.stringify(qrData), {
@@ -88,6 +100,7 @@ const ParkingTicket = ({ booking, onClose }: ParkingTicketProps) => {
     
     const details = [
       `Booking ID: ${booking.id}`,
+      `Slot Number: ${slotNumber}`,
       `Location: ${booking.location_name}`,
       `Address: ${booking.location_address}`,
       `Date: ${booking.date}`,
@@ -140,6 +153,12 @@ const ParkingTicket = ({ booking, onClose }: ParkingTicketProps) => {
         </CardHeader>
         
         <CardContent className="p-6 space-y-4">
+          {/* Slot Number - Prominent Display */}
+          <div className="bg-parking-primary/10 border-2 border-parking-primary rounded-lg p-4 text-center">
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Your Parking Slot</p>
+            <p className="text-4xl font-bold text-parking-primary">{slotNumber}</p>
+          </div>
+          
           <div className="text-center">
             <h3 className="font-semibold text-lg">{booking.location_name}</h3>
             <p className="text-sm text-muted-foreground flex items-center justify-center">
@@ -157,7 +176,7 @@ const ParkingTicket = ({ booking, onClose }: ParkingTicketProps) => {
               <p className="font-medium">Time</p>
               <p className="flex items-center">
                 <Clock className="h-4 w-4 mr-1" />
-                {booking.start_time}
+                {booking.start_time} - {booking.end_time}
               </p>
             </div>
             <div>
