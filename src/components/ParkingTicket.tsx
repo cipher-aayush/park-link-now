@@ -142,32 +142,32 @@ const ParkingTicket = ({ booking, onClose }: ParkingTicketProps) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="max-w-md w-full">
-        <CardHeader className="text-center bg-parking-primary text-primary-foreground">
-          <div className="flex items-center justify-center mb-2">
-            <Check className="h-8 w-8 text-green-400" />
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <Card className="max-w-md w-full my-4">
+        <CardHeader className="text-center bg-parking-primary text-primary-foreground py-3">
+          <div className="flex items-center justify-center mb-1">
+            <Check className="h-6 w-6 text-green-400" />
           </div>
-          <CardTitle className="text-xl">Booking Confirmed!</CardTitle>
-          <p className="text-sm opacity-90">Your parking spot has been reserved</p>
+          <CardTitle className="text-lg">Booking Confirmed!</CardTitle>
+          <p className="text-xs opacity-90">Your parking spot has been reserved</p>
         </CardHeader>
         
-        <CardContent className="p-6 space-y-4">
+        <CardContent className="p-4 space-y-3">
           {/* Slot Number - Prominent Display */}
-          <div className="bg-parking-primary/10 border-2 border-parking-primary rounded-lg p-4 text-center">
+          <div className="bg-parking-primary/10 border-2 border-parking-primary rounded-lg p-3 text-center">
             <p className="text-xs text-muted-foreground uppercase tracking-wide">Your Parking Slot</p>
-            <p className="text-4xl font-bold text-parking-primary">{slotNumber}</p>
+            <p className="text-3xl font-bold text-parking-primary">{slotNumber}</p>
           </div>
           
           <div className="text-center">
-            <h3 className="font-semibold text-lg">{booking.location_name}</h3>
-            <p className="text-sm text-muted-foreground flex items-center justify-center">
-              <MapPin className="h-4 w-4 mr-1" />
+            <h3 className="font-semibold text-base">{booking.location_name}</h3>
+            <p className="text-xs text-muted-foreground flex items-center justify-center">
+              <MapPin className="h-3 w-3 mr-1" />
               {booking.location_address}
             </p>
           </div>
           
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-2 gap-2 text-xs">
             <div>
               <p className="font-medium">Date</p>
               <p>{booking.date}</p>
@@ -175,7 +175,7 @@ const ParkingTicket = ({ booking, onClose }: ParkingTicketProps) => {
             <div>
               <p className="font-medium">Time</p>
               <p className="flex items-center">
-                <Clock className="h-4 w-4 mr-1" />
+                <Clock className="h-3 w-3 mr-1" />
                 {booking.start_time} - {booking.end_time}
               </p>
             </div>
@@ -186,14 +186,14 @@ const ParkingTicket = ({ booking, onClose }: ParkingTicketProps) => {
             <div>
               <p className="font-medium">Vehicle</p>
               <p className="flex items-center">
-                <Car className="h-4 w-4 mr-1" />
+                <Car className="h-3 w-3 mr-1" />
                 {booking.vehicle_number}
               </p>
             </div>
           </div>
           
-          <div className="border-t pt-4">
-            <div className="flex justify-between items-center text-lg font-semibold">
+          <div className="border-t pt-2">
+            <div className="flex justify-between items-center text-base font-semibold">
               <span>Total Amount</span>
               <span className="text-parking-primary">₹{booking.total_amount}</span>
             </div>
@@ -201,30 +201,33 @@ const ParkingTicket = ({ booking, onClose }: ParkingTicketProps) => {
           
           {qrCodeUrl && (
             <div className="text-center">
-              <img src={qrCodeUrl} alt="QR Code" className="mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground">Scan to verify your booking</p>
+              <img src={qrCodeUrl} alt="QR Code" className="mx-auto w-24 h-24" />
+              <p className="text-xs text-muted-foreground">Scan to verify</p>
             </div>
           )}
           
-          <div className="flex gap-2">
+          {/* Buttons moved up - always visible */}
+          <div className="flex gap-2 pt-2">
             <Button 
               onClick={downloadTicket}
               className="flex-1 bg-parking-primary hover:bg-parking-primary-light"
+              size="sm"
             >
-              <Download className="h-4 w-4 mr-2" />
-              Download Ticket
+              <Download className="h-4 w-4 mr-1" />
+              Download
             </Button>
             <Button 
               onClick={onClose}
               variant="outline"
               className="flex-1"
+              size="sm"
             >
-              Close
+              Go to Bookings
             </Button>
           </div>
           
           <div className="text-xs text-center text-muted-foreground">
-            Booking ID: {booking.id}
+            ID: {booking.id.substring(0, 8)}...
           </div>
         </CardContent>
       </Card>

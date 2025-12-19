@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -57,6 +58,7 @@ interface BookingModalProps {
 }
 
 const BookingModal = ({ isOpen, onClose, location, prefilledDate, prefilledTime, prefilledDuration }: BookingModalProps) => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const [bookingData, setBookingData] = useState({
@@ -72,15 +74,13 @@ const BookingModal = ({ isOpen, onClose, location, prefilledDate, prefilledTime,
   const [showTicket, setShowTicket] = useState(false);
   const [ticketData, setTicketData] = useState<any>(null);
 
-  const calculateTotal = () => {
-    if (!location) return 0;
-    const rate = bookingData.vehicleType === 'bike' ? location.price_per_hour * 0.5 : location.price_per_hour;
-    return rate * parseInt(bookingData.duration);
+  // Fixed pricing: Bike ₹10/hr, Car ₹15/hr
+  const getRate = () => {
+    return bookingData.vehicleType === 'bike' ? 10 : 15;
   };
 
-  const getRate = () => {
-    if (!location) return 0;
-    return bookingData.vehicleType === 'bike' ? location.price_per_hour * 0.5 : location.price_per_hour;
+  const calculateTotal = () => {
+    return getRate() * parseInt(bookingData.duration);
   };
 
   const calculateEndTime = () => {
@@ -298,8 +298,8 @@ const BookingModal = ({ isOpen, onClose, location, prefilledDate, prefilledTime,
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="car">🚗 Car (₹{location.price_per_hour}/hr)</SelectItem>
-                        <SelectItem value="bike">🏍️ Bike (₹{location.price_per_hour * 0.5}/hr)</SelectItem>
+                        <SelectItem value="car">🚗 Car (₹15/hr)</SelectItem>
+                        <SelectItem value="bike">🏍️ Bike (₹10/hr)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -390,6 +390,7 @@ const BookingModal = ({ isOpen, onClose, location, prefilledDate, prefilledTime,
           onClose={() => {
             setShowTicket(false);
             onClose();
+            navigate('/my-bookings');
           }}
         />
       )}
