@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, MapPin, Clock, Car, Check } from "lucide-react";
+import { Download, MapPin, Clock, Car, Bike, Check } from "lucide-react";
 import QRCode from "qrcode";
 import { useToast } from "@/hooks/use-toast";
 
@@ -16,6 +16,7 @@ interface ParkingTicketProps {
     duration: number;
     total_amount: number;
     vehicle_number: string;
+    vehicle_type?: string;
     qr_code?: string;
     slot_number?: string;
   };
@@ -98,6 +99,7 @@ const ParkingTicket = ({ booking, onClose }: ParkingTicketProps) => {
     let y = 120;
     const lineHeight = 30;
     
+    const vehicleTypeLabel = booking.vehicle_type === 'bike' ? 'Bike' : 'Car';
     const details = [
       `Booking ID: ${booking.id}`,
       `Slot Number: ${slotNumber}`,
@@ -105,7 +107,8 @@ const ParkingTicket = ({ booking, onClose }: ParkingTicketProps) => {
       `Address: ${booking.location_address}`,
       `Date: ${booking.date}`,
       `Time: ${booking.start_time} - ${booking.end_time}`,
-      `Duration: ${booking.duration} hour(s)`,
+      `Duration: ${booking.duration || 1} hour(s)`,
+      `Vehicle Type: ${vehicleTypeLabel}`,
       `Vehicle: ${booking.vehicle_number}`,
       `Amount: ₹${booking.total_amount}`
     ];
@@ -181,13 +184,17 @@ const ParkingTicket = ({ booking, onClose }: ParkingTicketProps) => {
             </div>
             <div>
               <p className="font-medium">Duration</p>
-              <p>{booking.duration} hour(s)</p>
+              <p>{booking.duration || 1} hour(s)</p>
             </div>
             <div>
               <p className="font-medium">Vehicle</p>
               <p className="flex items-center">
-                <Car className="h-3 w-3 mr-1" />
-                {booking.vehicle_number}
+                {booking.vehicle_type === 'bike' ? (
+                  <Bike className="h-3 w-3 mr-1" />
+                ) : (
+                  <Car className="h-3 w-3 mr-1" />
+                )}
+                {booking.vehicle_type === 'bike' ? 'Bike' : 'Car'} - {booking.vehicle_number}
               </p>
             </div>
           </div>

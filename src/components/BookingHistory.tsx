@@ -24,11 +24,11 @@ interface Booking {
   booking_date: string;
   start_time: string;
   end_time: string;
-  duration_hours: number;
   total_amount: number;
   booking_status: string;
   payment_status: string;
   vehicle_number: string;
+  vehicle_type: string;
   created_at: string;
   parking_locations?: {
     name: string;
@@ -36,6 +36,17 @@ interface Booking {
     price_per_hour: number;
   };
 }
+
+// Helper function to calculate duration from start_time and end_time
+const calculateDuration = (startTime: string, endTime: string): number => {
+  try {
+    const start = new Date(`1970-01-01T${startTime}`);
+    const end = new Date(`1970-01-01T${endTime}`);
+    return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60)) || 1;
+  } catch {
+    return 1;
+  }
+};
 
 const BookingHistory: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -247,9 +258,10 @@ const BookingHistory: React.FC = () => {
             date: format(new Date(selectedBooking.booking_date), 'MMM dd, yyyy'),
             start_time: selectedBooking.start_time,
             end_time: selectedBooking.end_time,
-            duration: selectedBooking.duration_hours,
+            duration: calculateDuration(selectedBooking.start_time, selectedBooking.end_time),
             total_amount: selectedBooking.total_amount,
             vehicle_number: selectedBooking.vehicle_number || 'N/A',
+            vehicle_type: selectedBooking.vehicle_type || 'car',
             qr_code: selectedBooking.id
           }}
           onClose={() => setSelectedBooking(null)}
@@ -390,7 +402,7 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onShowTicket, onCanc
               ₹{booking.total_amount}
             </p>
             <p className="text-xs text-muted-foreground">
-              {booking.duration_hours}h × ₹{booking.parking_locations?.price_per_hour}/h
+              {calculateDuration(booking.start_time, booking.end_time)}h × ₹{booking.parking_locations?.price_per_hour}/h
             </p>
           </div>
         </div>

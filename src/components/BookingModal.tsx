@@ -168,9 +168,10 @@ const BookingModal = ({ isOpen, onClose, location, prefilledDate, prefilledTime,
       date: bookingData.date,
       start_time: bookingData.startTime,
       end_time: calculateEndTime(),
-      duration: parseInt(bookingData.duration),
+      duration: parseInt(bookingData.duration) || 1,
       total_amount: calculateTotal(),
-      vehicle_number: bookingData.vehicleNumber
+      vehicle_number: bookingData.vehicleNumber,
+      vehicle_type: bookingData.vehicleType
     };
     
     setTicketData(ticket);
