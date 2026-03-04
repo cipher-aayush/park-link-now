@@ -12,7 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Calendar, Clock, MapPin, Car, Download, Star, Ticket, XCircle } from 'lucide-react';
+import { Calendar, Clock, MapPin, Car, Bike, Download, Star, Ticket, XCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -387,11 +387,15 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, onShowTicket, onCanc
           </div>
           
           <div className="flex items-center gap-2">
-            <Car className="w-4 h-4 text-muted-foreground" />
+            {booking.vehicle_type === 'bike' ? (
+              <Bike className="w-4 h-4 text-muted-foreground" />
+            ) : (
+              <Car className="w-4 h-4 text-muted-foreground" />
+            )}
             <div>
               <p className="font-medium">Vehicle</p>
               <p className="text-muted-foreground">
-                {booking.vehicle_number || 'N/A'}
+                {booking.vehicle_type === 'bike' ? 'Bike' : 'Car'} - {booking.vehicle_number || 'N/A'}
               </p>
             </div>
           </div>
